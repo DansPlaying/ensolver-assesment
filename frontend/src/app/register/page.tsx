@@ -7,11 +7,26 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { EyeIcon, EyeOffIcon } from "@/components/icons";
+
+const passwordRequirements = [
+  { id: "length", label: "At least 8 characters", test: (p: string) => p.length >= 8 },
+  { id: "lowercase", label: "Contains lowercase letter", test: (p: string) => /[a-z]/.test(p) },
+  { id: "uppercase", label: "Contains uppercase letter", test: (p: string) => /[A-Z]/.test(p) },
+  { id: "number", label: "Contains number", test: (p: string) => /\d/.test(p) },
+  { id: "special", label: "Contains special character", test: (p: string) => /[!@#$%^&*(),.?":{}|<>]/.test(p) },
+];
 
 const registerSchema = z.object({
   email: z.string().email("Please enter a valid email"),
-  password: z.string().min(4, "Password must be at least 4 characters"),
-  confirmPassword: z.string().min(4, "Please confirm your password"),
+  password: z
+    .string()
+    .min(8, "Password must be at least 8 characters")
+    .regex(/[a-z]/, "Password must contain a lowercase letter")
+    .regex(/[A-Z]/, "Password must contain an uppercase letter")
+    .regex(/\d/, "Password must contain a number")
+    .regex(/[!@#$%^&*(),.?":{}|<>]/, "Password must contain a special character"),
+  confirmPassword: z.string().min(8, "Please confirm your password"),
 }).refine((data) => data.password === data.confirmPassword, {
   message: "Passwords do not match",
   path: ["confirmPassword"],
@@ -23,14 +38,19 @@ export default function RegisterPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const {
     register,
     handleSubmit,
+    watch,
     formState: { errors },
   } = useForm<RegisterForm>({
     resolver: zodResolver(registerSchema),
   });
+
+  const password = watch("password", "");
 
   const onSubmit = async (data: RegisterForm) => {
     setIsLoading(true);
@@ -58,7 +78,6 @@ export default function RegisterPage() {
         return;
       }
 
-      // Auto login after registration
       const result = await signIn("credentials", {
         email: data.email,
         password: data.password,
@@ -136,21 +155,55 @@ export default function RegisterPage() {
             >
               Password
             </label>
-            <input
-              {...register("password")}
-              type="password"
-              id="password"
-              autoComplete="new-password"
-              aria-invalid={errors.password ? "true" : "false"}
-              aria-describedby={errors.password ? "password-error" : undefined}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="At least 4 characters"
-            />
-            {errors.password && (
-              <p id="password-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
-                {errors.password.message}
-              </p>
-            )}
+            <div className="relative mt-1">
+              <input
+                {...register("password")}
+                type={showPassword ? "text" : "password"}
+                id="password"
+                autoComplete="new-password"
+                aria-invalid={errors.password ? "true" : "false"}
+                aria-describedby="password-requirements"
+                className="block w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Create a strong password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOffIcon aria-hidden="true" /> : <EyeIcon aria-hidden="true" />}
+              </button>
+            </div>
+
+            <div id="password-requirements" className="mt-3 space-y-1">
+              {passwordRequirements.map((req) => {
+                const isMet = req.test(password);
+                return (
+                  <div
+                    key={req.id}
+                    className={`flex items-center gap-2 text-xs transition-colors ${
+                      isMet
+                        ? "text-green-600 dark:text-green-400"
+                        : "text-gray-500 dark:text-gray-400"
+                    }`}
+                  >
+                    <span className={`flex-shrink-0 w-4 h-4 flex items-center justify-center rounded-full border ${
+                      isMet
+                        ? "bg-green-100 border-green-500 dark:bg-green-900/30 dark:border-green-400"
+                        : "border-gray-300 dark:border-gray-600"
+                    }`}>
+                      {isMet && (
+                        <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                      )}
+                    </span>
+                    {req.label}
+                  </div>
+                );
+              })}
+            </div>
           </div>
 
           <div>
@@ -160,16 +213,26 @@ export default function RegisterPage() {
             >
               Confirm Password
             </label>
-            <input
-              {...register("confirmPassword")}
-              type="password"
-              id="confirmPassword"
-              autoComplete="new-password"
-              aria-invalid={errors.confirmPassword ? "true" : "false"}
-              aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Confirm your password"
-            />
+            <div className="relative mt-1">
+              <input
+                {...register("confirmPassword")}
+                type={showConfirmPassword ? "text" : "password"}
+                id="confirmPassword"
+                autoComplete="new-password"
+                aria-invalid={errors.confirmPassword ? "true" : "false"}
+                aria-describedby={errors.confirmPassword ? "confirm-password-error" : undefined}
+                className="block w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Confirm your password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              >
+                {showConfirmPassword ? <EyeOffIcon aria-hidden="true" /> : <EyeIcon aria-hidden="true" />}
+              </button>
+            </div>
             {errors.confirmPassword && (
               <p id="confirm-password-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
                 {errors.confirmPassword.message}

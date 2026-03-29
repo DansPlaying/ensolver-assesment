@@ -29,13 +29,13 @@ export class AuthService implements OnModuleInit {
     });
 
     if (!existingUser) {
-      const hashedPassword = await bcrypt.hash('admin123', 10);
+      const hashedPassword = await bcrypt.hash('Admin@123', 10);
       const user = this.usersRepository.create({
         email: 'admin@example.com',
         password: hashedPassword,
       });
       await this.usersRepository.save(user);
-      console.log('Default admin user created: admin@example.com / admin123');
+      console.log('Default admin user created: admin@example.com / Admin@123');
     }
   }
 

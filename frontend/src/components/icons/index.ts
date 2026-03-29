@@ -7,3 +7,4 @@ export { SunIcon } from './SunIcon';
 export { MoonIcon } from './MoonIcon';
 export { WarningIcon } from './WarningIcon';
 export { XIcon } from './XIcon';
+export { EyeIcon, EyeOffIcon } from './EyeIcon';

@@ -7,10 +7,11 @@ import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { EyeIcon, EyeOffIcon } from "@/components/icons";
 
 const loginSchema = z.object({
-  email: z.email("Please enter a valid email"),
-  password: z.string().min(4, "Password must be at least 4 characters"),
+  email: z.string().email("Please enter a valid email"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -19,6 +20,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const {
     register,
@@ -109,16 +111,26 @@ export default function LoginPage() {
             >
               Password
             </label>
-            <input
-              {...register("password")}
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              aria-invalid={errors.password ? "true" : "false"}
-              aria-describedby={errors.password ? "password-error" : undefined}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              placeholder="Enter your password"
-            />
+            <div className="relative mt-1">
+              <input
+                {...register("password")}
+                type={showPassword ? "text" : "password"}
+                id="password"
+                autoComplete="current-password"
+                aria-invalid={errors.password ? "true" : "false"}
+                aria-describedby={errors.password ? "password-error" : undefined}
+                className="block w-full px-3 py-2 pr-10 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Enter your password"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? <EyeOffIcon aria-hidden="true" /> : <EyeIcon aria-hidden="true" />}
+              </button>
+            </div>
             {errors.password && (
               <p id="password-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
                 {errors.password.message}
@@ -145,7 +157,7 @@ export default function LoginPage() {
           </p>
 
           <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-            Default: admin@example.com / admin123
+            Default: admin@example.com / Admin@123
           </p>
         </form>
       </div>
