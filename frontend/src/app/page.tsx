@@ -14,7 +14,7 @@ import {
   deleteCategory,
   removeCategoryFromNote,
 } from '@/lib/api';
-import { NoteCard, NoteForm, Modal, CategoryFilter } from '@/components';
+import { NoteCard, NoteForm, Modal, CategoryFilter, ConfirmDialog } from '@/components';
 
 export default function HomePage() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -24,6 +24,8 @@ export default function HomePage() {
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [deleteNoteConfirm, setDeleteNoteConfirm] = useState<Note | null>(null);
+  const [deleteCategoryConfirm, setDeleteCategoryConfirm] = useState<Category | null>(null);
 
   const loadData = useCallback(async () => {
     try {
@@ -74,10 +76,11 @@ export default function HomePage() {
     }
   };
 
-  const handleDeleteNote = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this note?')) return;
+  const handleDeleteNote = async () => {
+    if (!deleteNoteConfirm) return;
     try {
-      await deleteNote(id);
+      await deleteNote(deleteNoteConfirm.id);
+      setDeleteNoteConfirm(null);
       loadData();
     } catch (error) {
       console.error('Failed to delete note:', error);
@@ -111,11 +114,12 @@ export default function HomePage() {
     }
   };
 
-  const handleDeleteCategory = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this category?')) return;
+  const handleDeleteCategory = async () => {
+    if (!deleteCategoryConfirm) return;
     try {
-      await deleteCategory(id);
-      if (selectedCategory === id) setSelectedCategory(null);
+      await deleteCategory(deleteCategoryConfirm.id);
+      if (selectedCategory === deleteCategoryConfirm.id) setSelectedCategory(null);
+      setDeleteCategoryConfirm(null);
       loadData();
     } catch (error) {
       console.error('Failed to delete category:', error);
@@ -173,7 +177,10 @@ export default function HomePage() {
             setShowSidebar(false);
           }}
           onCreateCategory={handleCreateCategory}
-          onDeleteCategory={handleDeleteCategory}
+          onDeleteCategory={(id) => {
+            const category = categories.find((c) => c.id === id);
+            if (category) setDeleteCategoryConfirm(category);
+          }}
         />
       </aside>
 
@@ -203,7 +210,7 @@ export default function HomePage() {
                 key={note.id}
                 note={note}
                 onEdit={() => openEditModal(note)}
-                onDelete={() => handleDeleteNote(note.id)}
+                onDelete={() => setDeleteNoteConfirm(note)}
                 onArchive={() => handleArchiveNote(note.id)}
                 onRemoveCategory={(categoryId) =>
                   handleRemoveCategory(note.id, categoryId)
@@ -226,6 +233,24 @@ export default function HomePage() {
           onCancel={closeModal}
         />
       </Modal>
+
+      <ConfirmDialog
+        isOpen={!!deleteNoteConfirm}
+        title="Delete Note"
+        message={`Are you sure you want to delete "${deleteNoteConfirm?.title}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        onConfirm={handleDeleteNote}
+        onCancel={() => setDeleteNoteConfirm(null)}
+      />
+
+      <ConfirmDialog
+        isOpen={!!deleteCategoryConfirm}
+        title="Delete Category"
+        message={`Are you sure you want to delete "${deleteCategoryConfirm?.name}"? Notes in this category will not be deleted.`}
+        confirmLabel="Delete"
+        onConfirm={handleDeleteCategory}
+        onCancel={() => setDeleteCategoryConfirm(null)}
+      />
     </div>
   );
 }

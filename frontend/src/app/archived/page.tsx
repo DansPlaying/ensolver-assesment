@@ -11,7 +11,7 @@ import {
   getCategories,
   removeCategoryFromNote,
 } from '@/lib/api';
-import { NoteCard, NoteForm, Modal } from '@/components';
+import { NoteCard, NoteForm, Modal, ConfirmDialog } from '@/components';
 
 export default function ArchivedPage() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -19,6 +19,7 @@ export default function ArchivedPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
+  const [deleteNoteConfirm, setDeleteNoteConfirm] = useState<Note | null>(null);
 
   const loadData = useCallback(async () => {
     try {
@@ -55,10 +56,11 @@ export default function ArchivedPage() {
     }
   };
 
-  const handleDeleteNote = async (id: number) => {
-    if (!confirm('Are you sure you want to delete this note?')) return;
+  const handleDeleteNote = async () => {
+    if (!deleteNoteConfirm) return;
     try {
-      await deleteNote(id);
+      await deleteNote(deleteNoteConfirm.id);
+      setDeleteNoteConfirm(null);
       loadData();
     } catch (error) {
       console.error('Failed to delete note:', error);
@@ -116,7 +118,7 @@ export default function ArchivedPage() {
               key={note.id}
               note={note}
               onEdit={() => openEditModal(note)}
-              onDelete={() => handleDeleteNote(note.id)}
+              onDelete={() => setDeleteNoteConfirm(note)}
               onArchive={() => handleUnarchiveNote(note.id)}
               onRemoveCategory={(categoryId) =>
                 handleRemoveCategory(note.id, categoryId)
@@ -138,6 +140,15 @@ export default function ArchivedPage() {
           onCancel={closeModal}
         />
       </Modal>
+
+      <ConfirmDialog
+        isOpen={!!deleteNoteConfirm}
+        title="Delete Note"
+        message={`Are you sure you want to delete "${deleteNoteConfirm?.title}"? This action cannot be undone.`}
+        confirmLabel="Delete"
+        onConfirm={handleDeleteNote}
+        onCancel={() => setDeleteNoteConfirm(null)}
+      />
     </div>
   );
 }

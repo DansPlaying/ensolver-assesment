@@ -1,5 +1,6 @@
 export { Header } from './Header';
 export { Modal } from './Modal';
+export { ConfirmDialog } from './ConfirmDialog';
 export { NoteCard } from './NoteCard';
 export { NoteForm } from './NoteForm';
 export { CategoryBadge } from './CategoryBadge';
