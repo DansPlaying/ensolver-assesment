@@ -40,9 +40,9 @@ export function NoteForm({ note, categories, onSubmit, onCancel }: NoteFormProps
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Title
         </label>
         <input
@@ -50,28 +50,28 @@ export function NoteForm({ note, categories, onSubmit, onCancel }: NoteFormProps
           id="title"
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           required
         />
       </div>
 
       <div>
-        <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-1">
+        <label htmlFor="content" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Content
         </label>
         <textarea
           id="content"
           value={content}
           onChange={(e) => setContent(e.target.value)}
-          rows={5}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          rows={4}
+          className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
           required
         />
       </div>
 
       {categories.length > 0 && (
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Categories
           </label>
           <div className="flex flex-wrap gap-2">
@@ -82,8 +82,8 @@ export function NoteForm({ note, categories, onSubmit, onCancel }: NoteFormProps
                 onClick={() => toggleCategory(category.id)}
                 className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
                   selectedCategories.includes(category.id)
-                    ? 'bg-blue-500 text-white'
-                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
                 }`}
               >
                 {category.name}
@@ -93,17 +93,17 @@ export function NoteForm({ note, categories, onSubmit, onCancel }: NoteFormProps
         </div>
       )}
 
-      <div className="flex justify-end gap-3 pt-4">
+      <div className="flex justify-end gap-2 pt-3 sm:pt-4">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+          className="px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
         >
           Cancel
         </button>
         <button
           type="submit"
-          className="px-4 py-2 text-sm font-medium text-white bg-blue-500 rounded-md hover:bg-blue-600"
+          className="px-3 sm:px-4 py-2 text-sm font-medium text-white bg-primary-500 rounded-lg hover:bg-primary-600"
         >
           {note ? 'Update' : 'Create'}
         </button>

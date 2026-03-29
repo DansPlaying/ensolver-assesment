@@ -96,21 +96,21 @@ export default function ArchivedPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-gray-500 dark:text-gray-400">Loading...</div>
       </div>
     );
   }
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Archived Notes</h1>
+      <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-4 sm:mb-6">Archived Notes</h1>
 
       {notes.length === 0 ? (
-        <div className="text-center py-12 text-gray-500">
+        <div className="text-center py-12 text-gray-500 dark:text-gray-400">
           No archived notes.
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {notes.map((note) => (
             <NoteCard
               key={note.id}

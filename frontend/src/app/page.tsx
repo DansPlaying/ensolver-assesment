@@ -23,6 +23,7 @@ export default function HomePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingNote, setEditingNote] = useState<Note | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showSidebar, setShowSidebar] = useState(false);
 
   const loadData = useCallback(async () => {
     try {
@@ -134,44 +135,69 @@ export default function HomePage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-gray-500">Loading...</div>
+        <div className="text-gray-500 dark:text-gray-400">Loading...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex gap-6">
-      <aside className="w-64 flex-shrink-0">
+    <div className="flex flex-col lg:flex-row gap-4 lg:gap-6">
+      {/* Mobile filter toggle */}
+      <div className="lg:hidden flex items-center justify-between">
+        <button
+          onClick={() => setShowSidebar(!showSidebar)}
+          className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+          </svg>
+          {selectedCategory
+            ? categories.find((c) => c.id === selectedCategory)?.name
+            : 'All Categories'}
+        </button>
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="px-4 py-2 bg-primary-500 text-white text-sm rounded-lg hover:bg-primary-600 font-medium"
+        >
+          + New
+        </button>
+      </div>
+
+      {/* Sidebar - hidden on mobile unless toggled */}
+      <aside className={`${showSidebar ? 'block' : 'hidden'} lg:block w-full lg:w-56 flex-shrink-0`}>
         <CategoryFilter
           categories={categories}
           selectedCategory={selectedCategory}
-          onSelectCategory={setSelectedCategory}
+          onSelectCategory={(id) => {
+            setSelectedCategory(id);
+            setShowSidebar(false);
+          }}
           onCreateCategory={handleCreateCategory}
           onDeleteCategory={handleDeleteCategory}
         />
       </aside>
 
-      <div className="flex-1">
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">
+      <div className="flex-1 min-w-0">
+        <div className="hidden lg:flex justify-between items-center mb-6">
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">
             {selectedCategory
-              ? `Notes: ${categories.find((c) => c.id === selectedCategory)?.name}`
+              ? categories.find((c) => c.id === selectedCategory)?.name
               : 'All Active Notes'}
           </h1>
           <button
             onClick={() => setIsModalOpen(true)}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 font-medium"
+            className="px-4 py-2 bg-primary-500 text-white text-sm rounded-lg hover:bg-primary-600 font-medium"
           >
             + New Note
           </button>
         </div>
 
         {notes.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
+          <div className="text-center py-12 text-gray-500 dark:text-gray-400">
             No notes yet. Create your first note!
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
             {notes.map((note) => (
               <NoteCard
                 key={note.id}

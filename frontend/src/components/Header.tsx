@@ -2,39 +2,43 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { ThemeToggle } from './ThemeToggle';
 
 export function Header() {
   const pathname = usePathname();
 
   return (
-    <header className="bg-white shadow-sm">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="text-xl font-bold text-gray-900">
-            Notes App
+    <header className="bg-white dark:bg-gray-800 shadow-sm transition-colors">
+      <div className="max-w-6xl mx-auto px-4">
+        <div className="flex items-center justify-between h-14">
+          <Link href="/" className="text-lg font-bold text-gray-900 dark:text-white">
+            Notes
           </Link>
-          <nav className="flex gap-4">
-            <Link
-              href="/"
-              className={`px-3 py-2 rounded-md text-sm font-medium ${
-                pathname === '/'
-                  ? 'bg-gray-100 text-gray-900'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Active Notes
-            </Link>
-            <Link
-              href="/archived"
-              className={`px-3 py-2 rounded-md text-sm font-medium ${
-                pathname === '/archived'
-                  ? 'bg-gray-100 text-gray-900'
-                  : 'text-gray-600 hover:text-gray-900'
-              }`}
-            >
-              Archived
-            </Link>
-          </nav>
+          <div className="flex items-center gap-1 sm:gap-2">
+            <nav className="flex">
+              <Link
+                href="/"
+                className={`px-2 sm:px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  pathname === '/'
+                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                Active
+              </Link>
+              <Link
+                href="/archived"
+                className={`px-2 sm:px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                  pathname === '/archived'
+                    ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                }`}
+              >
+                Archived
+              </Link>
+            </nav>
+            <ThemeToggle />
+          </div>
         </div>
       </div>
     </header>

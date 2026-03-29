@@ -7,7 +7,7 @@ interface CategoryBadgeProps {
 
 export function CategoryBadge({ category, onRemove }: CategoryBadgeProps) {
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+    <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium bg-primary-100 dark:bg-primary-900 text-primary-800 dark:text-primary-200 transition-colors">
       {category.name}
       {onRemove && (
         <button
@@ -15,7 +15,7 @@ export function CategoryBadge({ category, onRemove }: CategoryBadgeProps) {
             e.stopPropagation();
             onRemove();
           }}
-          className="hover:text-blue-600"
+          className="hover:text-primary-600 dark:hover:text-primary-400"
         >
           <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
             <path

@@ -4,3 +4,4 @@ export { NoteCard } from './NoteCard';
 export { NoteForm } from './NoteForm';
 export { CategoryBadge } from './CategoryBadge';
 export { CategoryFilter } from './CategoryFilter';
+export { ThemeToggle } from './ThemeToggle';
