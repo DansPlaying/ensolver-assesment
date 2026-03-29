@@ -1,4 +1,6 @@
+import { redirect } from "next/navigation";
 import { getNotes, getCategories } from "@/lib/api";
+import { auth } from "@/lib/auth";
 import { Notes } from "./notes";
 
 export default async function HomePage({
@@ -6,12 +8,19 @@ export default async function HomePage({
 }: {
   searchParams: Promise<{ category?: string }>;
 }) {
+  const session = await auth();
+
+  if (!session?.accessToken) {
+    redirect("/login");
+  }
+
+  const token = session.accessToken;
   const params = await searchParams;
   const categoryId = params.category ? parseInt(params.category) : undefined;
 
   const [notes, categories] = await Promise.all([
-    getNotes(categoryId),
-    getCategories(),
+    getNotes(categoryId, token),
+    getCategories(token),
   ]);
 
   return (
@@ -19,6 +28,7 @@ export default async function HomePage({
       initialNotes={notes}
       initialCategories={categories}
       selectedCategoryId={categoryId}
+      accessToken={token}
     />
   );
 }

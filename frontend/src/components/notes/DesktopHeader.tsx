@@ -12,6 +12,7 @@ export function DesktopHeader({ title, onCreateNote }: DesktopHeaderProps) {
       <button
         onClick={onCreateNote}
         className="px-4 py-2 bg-primary-500 text-white text-sm rounded-lg hover:bg-primary-600 font-medium"
+        title="Create new note"
       >
         + New Note
       </button>

@@ -17,6 +17,7 @@ export function CategoryBadge({ category, onRemove }: CategoryBadgeProps) {
             onRemove();
           }}
           className="hover:text-primary-600 dark:hover:text-primary-400"
+          title="Remove category"
         >
           <XIcon />
         </button>

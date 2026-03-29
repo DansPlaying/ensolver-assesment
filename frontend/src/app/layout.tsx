@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import "./globals.css";
 import { Header } from "@/components/Header";
 import { ThemeProvider } from "@/providers/theme-provider";
+import { SessionProvider } from "@/providers/session-provider";
+import { ToastProvider } from "@/providers/toast-provider";
 
 export const metadata: Metadata = {
   title: "Notes App",
@@ -31,12 +32,16 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors">
-        <ThemeProvider>
-          <Header />
-          <main className="max-w-6xl mx-auto px-4 py-6 sm:py-8">
-            {children}
-          </main>
-        </ThemeProvider>
+        <SessionProvider>
+          <ThemeProvider>
+            <ToastProvider>
+              <Header />
+              <main className="max-w-6xl mx-auto px-4 py-6 sm:py-8">
+                {children}
+              </main>
+            </ToastProvider>
+          </ThemeProvider>
+        </SessionProvider>
       </body>
     </html>
   );

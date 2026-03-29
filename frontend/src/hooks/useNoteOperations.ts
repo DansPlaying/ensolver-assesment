@@ -11,22 +11,22 @@ interface NoteFormData {
   categoryIds: number[];
 }
 
-export function useNoteOperations(setNotes: SetNotes) {
+export function useNoteOperations(setNotes: SetNotes, token?: string) {
   const handleUpdate = useCallback(
     async (noteId: number, data: NoteFormData) => {
-      const updatedNote = await updateNote(noteId, data);
+      const updatedNote = await updateNote(noteId, data, token);
       setNotes((prev) => prev.map((n) => (n.id === updatedNote.id ? updatedNote : n)));
       return updatedNote;
     },
-    [setNotes]
+    [setNotes, token]
   );
 
   const handleDelete = useCallback(
     async (noteId: number) => {
-      await deleteNote(noteId);
+      await deleteNote(noteId, token);
       setNotes((prev) => prev.filter((n) => n.id !== noteId));
     },
-    [setNotes]
+    [setNotes, token]
   );
 
   const handleRemoveFromList = useCallback(
@@ -38,11 +38,11 @@ export function useNoteOperations(setNotes: SetNotes) {
 
   const handleRemoveCategory = useCallback(
     async (noteId: number, categoryId: number) => {
-      const updatedNote = await removeCategoryFromNote(noteId, categoryId);
+      const updatedNote = await removeCategoryFromNote(noteId, categoryId, token);
       setNotes((prev) => prev.map((n) => (n.id === updatedNote.id ? updatedNote : n)));
       return updatedNote;
     },
-    [setNotes]
+    [setNotes, token]
   );
 
   return {

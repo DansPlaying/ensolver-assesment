@@ -5,11 +5,15 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   ManyToMany,
+  ManyToOne,
   JoinTable,
+  Unique,
 } from 'typeorm';
 import { Category } from './category.entity';
+import { User } from './user.entity';
 
 @Entity()
+@Unique(['title', 'userId'])
 export class Note {
   @PrimaryGeneratedColumn()
   id: number;
@@ -32,4 +36,10 @@ export class Note {
   @ManyToMany(() => Category, (category) => category.notes, { eager: true })
   @JoinTable()
   categories: Category[];
+
+  @ManyToOne(() => User, (user) => user.notes, { nullable: false })
+  user: User;
+
+  @Column()
+  userId: number;
 }

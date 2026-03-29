@@ -1,25 +1,38 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Note, Category, unarchiveNote } from "@/lib/api";
 import { NoteForm, Modal, ConfirmDialog, NotesGrid } from "@/components";
 import { useNoteModal, useConfirmDialog, useNoteOperations } from "@/hooks";
+import { useToast } from "@/providers/toast-provider";
 
 interface ArchivedNotesProps {
   initialNotes: Note[];
   initialCategories: Category[];
+  accessToken?: string;
 }
 
 export function ArchivedNotes({
   initialNotes,
   initialCategories,
+  accessToken,
 }: ArchivedNotesProps) {
+  const toast = useToast();
   const [notes, setNotes] = useState(initialNotes);
-  const [categories] = useState(initialCategories);
+  const [categories, setCategories] = useState(initialCategories);
+
+  // Sync state when server data changes
+  useEffect(() => {
+    setNotes(initialNotes);
+  }, [initialNotes]);
+
+  useEffect(() => {
+    setCategories(initialCategories);
+  }, [initialCategories]);
 
   const noteModal = useNoteModal();
   const deleteNoteDialog = useConfirmDialog<Note>();
-  const noteOps = useNoteOperations(setNotes);
+  const noteOps = useNoteOperations(setNotes, accessToken);
 
   const handleUpdateNote = async (data: {
     title: string;
@@ -30,8 +43,10 @@ export function ArchivedNotes({
     try {
       await noteOps.handleUpdate(noteModal.editingNote.id, data);
       noteModal.close();
+      toast.success("Note updated successfully");
     } catch (error) {
-      console.error("Failed to update note:", error);
+      const message = error instanceof Error ? error.message : "Failed to update note";
+      toast.error(message);
     }
   };
 
@@ -40,17 +55,21 @@ export function ArchivedNotes({
     try {
       await noteOps.handleDelete(deleteNoteDialog.item.id);
       deleteNoteDialog.close();
+      toast.success("Note deleted successfully");
     } catch (error) {
-      console.error("Failed to delete note:", error);
+      const message = error instanceof Error ? error.message : "Failed to delete note";
+      toast.error(message);
     }
   };
 
   const handleUnarchiveNote = async (id: number) => {
     try {
-      await unarchiveNote(id);
+      await unarchiveNote(id, accessToken);
       noteOps.handleRemoveFromList(id);
+      toast.success("Note restored successfully");
     } catch (error) {
-      console.error("Failed to unarchive note:", error);
+      const message = error instanceof Error ? error.message : "Failed to restore note";
+      toast.error(message);
     }
   };
 

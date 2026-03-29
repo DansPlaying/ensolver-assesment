@@ -1,19 +1,31 @@
 # Notes Application
 
-A full-stack notes application with tagging and filtering capabilities. Built with NestJS (backend) and Next.js (frontend).
+A full-stack notes application with tagging, filtering, and user authentication. Built with NestJS (backend) and Next.js (frontend).
 
 ## Features
 
-### Phase 1 (Core Features)
+### Core Features
+- User authentication with 30-day sessions
 - Create, edit, and delete notes
 - Archive and unarchive notes
 - View active notes list
 - View archived notes list
 
-### Phase 2 (Extended Features)
+### Extended Features
 - Add/remove categories (tags) to notes
 - Filter notes by category
 - Manage categories (create/delete)
+- Dark mode support
+- User-specific notes and categories
+
+## Default Credentials
+
+| Field | Value |
+|-------|-------|
+| Email | admin@example.com |
+| Password | admin123 |
+
+A default admin user is automatically created when the backend starts for the first time.
 
 ## Tech Stack
 
@@ -21,12 +33,13 @@ A full-stack notes application with tagging and filtering capabilities. Built wi
 |-----------|------------|---------|
 | Runtime | Node.js | 20.x |
 | Package Manager | npm | 10.x |
-| Backend | NestJS | 10.x |
+| Backend | NestJS | 11.x |
 | Backend ORM | TypeORM | 0.3.x |
 | Database | SQLite | 3.x |
 | Frontend | Next.js | 14.x |
 | Frontend | React | 18.x |
-| Styling | Tailwind CSS | 3.x |
+| Authentication | NextAuth.js | 5.x |
+| Styling | Tailwind CSS | 4.x |
 
 ## Requirements
 
@@ -72,9 +85,31 @@ npm run dev
 
 The frontend application will be available at http://localhost:3001
 
+## Environment Variables
+
+### Backend (.env)
+
+```
+JWT_SECRET=your-secret-key-here
+```
+
+### Frontend (.env.local)
+
+```
+AUTH_SECRET=your-secret-key-here
+NEXT_PUBLIC_API_URL=http://localhost:3000
+```
+
 ## API Endpoints
 
-### Notes
+### Authentication
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | /auth/login | Login with email/password |
+| GET | /auth/me | Get current user profile |
+
+### Notes (requires authentication)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -89,7 +124,7 @@ The frontend application will be available at http://localhost:3001
 | POST | /notes/:id/categories/:categoryId | Add category to note |
 | DELETE | /notes/:id/categories/:categoryId | Remove category from note |
 
-### Categories
+### Categories (requires authentication)
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
@@ -104,6 +139,7 @@ The frontend application will be available at http://localhost:3001
 /
 ├── backend/                 # NestJS REST API
 │   ├── src/
+│   │   ├── auth/           # Authentication module
 │   │   ├── entities/       # TypeORM entities
 │   │   ├── notes/          # Notes module (controller, service, DTOs)
 │   │   ├── categories/     # Categories module (controller, service, DTOs)
@@ -115,7 +151,10 @@ The frontend application will be available at http://localhost:3001
 │   ├── src/
 │   │   ├── app/           # Next.js App Router pages
 │   │   ├── components/    # React components
-│   │   └── lib/           # API client and utilities
+│   │   ├── hooks/         # Custom React hooks
+│   │   ├── lib/           # API client, auth config
+│   │   ├── providers/     # React context providers
+│   │   └── types/         # TypeScript type definitions
 │   └── package.json
 │
 ├── start.sh               # Startup script
@@ -127,6 +166,12 @@ The frontend application will be available at http://localhost:3001
 The application uses SQLite for data persistence. The database file (`notes.db`) is automatically created in the `backend/` directory when the application starts for the first time.
 
 No additional database setup is required.
+
+## Authentication
+
+- Sessions are valid for 30 days
+- JWT tokens are used for API authentication
+- Each user has their own isolated notes and categories
 
 ## Development
 

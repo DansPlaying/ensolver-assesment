@@ -7,3 +7,4 @@ export { CategoryBadge } from './CategoryBadge';
 export { CategoryFilter } from './CategoryFilter';
 export { ThemeToggle } from './ThemeToggle';
 export { NotesGrid } from './NotesGrid';
+export { Toast, ToastContainer } from './Toast';

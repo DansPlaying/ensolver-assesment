@@ -42,6 +42,7 @@ export function Modal({ isOpen, onClose, title, children }: ModalProps) {
             <button
               onClick={onClose}
               className="p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+              title="Close"
             >
               <CloseIcon />
             </button>

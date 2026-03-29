@@ -1,6 +1,11 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, Not } from 'typeorm';
 import { Note } from '../entities/note.entity';
 import { Category } from '../entities/category.entity';
 import { CreateNoteDto, UpdateNoteDto } from './dto';
@@ -14,11 +19,12 @@ export class NotesService {
     private categoriesRepository: Repository<Category>,
   ) {}
 
-  async findAll(categoryId?: number): Promise<Note[]> {
+  async findAll(userId: number, categoryId?: number): Promise<Note[]> {
     const queryBuilder = this.notesRepository
       .createQueryBuilder('note')
       .leftJoinAndSelect('note.categories', 'category')
-      .where('note.isArchived = :isArchived', { isArchived: false });
+      .where('note.isArchived = :isArchived', { isArchived: false })
+      .andWhere('note.userId = :userId', { userId });
 
     if (categoryId) {
       queryBuilder.andWhere('category.id = :categoryId', { categoryId });
@@ -27,69 +33,127 @@ export class NotesService {
     return queryBuilder.orderBy('note.updatedAt', 'DESC').getMany();
   }
 
-  async findArchived(): Promise<Note[]> {
+  async findArchived(userId: number): Promise<Note[]> {
     return this.notesRepository.find({
-      where: { isArchived: true },
+      where: { isArchived: true, userId },
+      relations: ['categories'],
       order: { updatedAt: 'DESC' },
     });
   }
 
-  async findOne(id: number): Promise<Note> {
-    const note = await this.notesRepository.findOne({ where: { id } });
+  async findOne(id: number, userId: number): Promise<Note> {
+    const note = await this.notesRepository.findOne({
+      where: { id },
+      relations: ['categories'],
+    });
     if (!note) {
       throw new NotFoundException(`Note with ID ${id} not found`);
+    }
+    if (note.userId !== userId) {
+      throw new ForbiddenException('You do not have access to this note');
     }
     return note;
   }
 
-  async create(createNoteDto: CreateNoteDto): Promise<Note> {
-    const { categoryIds, ...noteData } = createNoteDto;
-    const note = this.notesRepository.create(noteData);
-
-    if (categoryIds && categoryIds.length > 0) {
-      note.categories = await this.categoriesRepository.findByIds(categoryIds);
+  private async checkDuplicateTitle(
+    title: string,
+    userId: number,
+    excludeId?: number,
+  ): Promise<void> {
+    const whereCondition: Record<string, unknown> = { title, userId };
+    if (excludeId) {
+      whereCondition.id = Not(excludeId);
     }
 
-    return this.notesRepository.save(note);
+    const existing = await this.notesRepository.findOne({
+      where: whereCondition,
+    });
+
+    if (existing) {
+      throw new ConflictException(
+        `A note with the title "${title}" already exists`,
+      );
+    }
   }
 
-  async update(id: number, updateNoteDto: UpdateNoteDto): Promise<Note> {
-    const note = await this.findOne(id);
+  async create(createNoteDto: CreateNoteDto, userId: number): Promise<Note> {
+    const { categoryIds, ...noteData } = createNoteDto;
+
+    await this.checkDuplicateTitle(noteData.title, userId);
+
+    const note = this.notesRepository.create({ ...noteData, userId });
+
+    if (categoryIds && categoryIds.length > 0) {
+      const categories = await this.categoriesRepository
+        .createQueryBuilder('category')
+        .where('category.id IN (:...ids)', { ids: categoryIds })
+        .andWhere('category.userId = :userId', { userId })
+        .getMany();
+      note.categories = categories;
+    } else {
+      note.categories = [];
+    }
+
+    const savedNote = await this.notesRepository.save(note);
+    return this.findOne(savedNote.id, userId);
+  }
+
+  async update(
+    id: number,
+    updateNoteDto: UpdateNoteDto,
+    userId: number,
+  ): Promise<Note> {
+    const note = await this.findOne(id, userId);
     const { categoryIds, ...noteData } = updateNoteDto;
+
+    if (noteData.title && noteData.title !== note.title) {
+      await this.checkDuplicateTitle(noteData.title, userId, id);
+    }
 
     Object.assign(note, noteData);
 
     if (categoryIds !== undefined) {
-      note.categories =
-        categoryIds.length > 0
-          ? await this.categoriesRepository.findByIds(categoryIds)
-          : [];
+      if (categoryIds.length > 0) {
+        const categories = await this.categoriesRepository
+          .createQueryBuilder('category')
+          .where('category.id IN (:...ids)', { ids: categoryIds })
+          .andWhere('category.userId = :userId', { userId })
+          .getMany();
+        note.categories = categories;
+      } else {
+        note.categories = [];
+      }
     }
 
-    return this.notesRepository.save(note);
+    await this.notesRepository.save(note);
+    return this.findOne(id, userId);
   }
 
-  async remove(id: number): Promise<void> {
-    const note = await this.findOne(id);
+  async remove(id: number, userId: number): Promise<void> {
+    const note = await this.findOne(id, userId);
     await this.notesRepository.remove(note);
   }
 
-  async archive(id: number): Promise<Note> {
-    const note = await this.findOne(id);
+  async archive(id: number, userId: number): Promise<Note> {
+    const note = await this.findOne(id, userId);
     note.isArchived = true;
     return this.notesRepository.save(note);
   }
 
-  async unarchive(id: number): Promise<Note> {
-    const note = await this.findOne(id);
+  async unarchive(id: number, userId: number): Promise<Note> {
+    const note = await this.findOne(id, userId);
     note.isArchived = false;
     return this.notesRepository.save(note);
   }
 
-  async addCategory(noteId: number, categoryId: number): Promise<Note> {
-    const note = await this.findOne(noteId);
+  async addCategory(
+    noteId: number,
+    categoryId: number,
+    userId: number,
+  ): Promise<Note> {
+    const note = await this.findOne(noteId, userId);
     const category = await this.categoriesRepository.findOne({
-      where: { id: categoryId },
+      where: { id: categoryId, userId },
     });
 
     if (!category) {
@@ -104,8 +168,12 @@ export class NotesService {
     return note;
   }
 
-  async removeCategory(noteId: number, categoryId: number): Promise<Note> {
-    const note = await this.findOne(noteId);
+  async removeCategory(
+    noteId: number,
+    categoryId: number,
+    userId: number,
+  ): Promise<Note> {
+    const note = await this.findOne(noteId, userId);
     note.categories = note.categories.filter((c) => c.id !== categoryId);
     return this.notesRepository.save(note);
   }
