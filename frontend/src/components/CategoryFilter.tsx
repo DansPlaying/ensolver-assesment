@@ -5,6 +5,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Category } from '@/lib/api';
+import { CloseIcon } from './icons';
 
 const categorySchema = z.object({
   name: z.string().min(1, 'Name is required').max(30, 'Name must be less than 30 characters'),
@@ -112,9 +113,7 @@ export function CategoryFilter({
               className="p-1 text-gray-400 hover:text-red-500 dark:hover:text-red-400 opacity-0 group-hover:opacity-100 transition-opacity"
               title="Delete category"
             >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <CloseIcon className="w-4 h-4" />
             </button>
           </div>
         ))}
