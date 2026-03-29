@@ -1,16 +1,19 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { Note, Category, unarchiveNote } from '@/lib/api';
-import { NoteForm, Modal, ConfirmDialog, NotesGrid } from '@/components';
-import { useNoteModal, useConfirmDialog, useNoteOperations } from '@/hooks';
+import { useState } from "react";
+import { Note, Category, unarchiveNote } from "@/lib/api";
+import { NoteForm, Modal, ConfirmDialog, NotesGrid } from "@/components";
+import { useNoteModal, useConfirmDialog, useNoteOperations } from "@/hooks";
 
-interface ArchivedClientProps {
+interface ArchivedNotesProps {
   initialNotes: Note[];
   initialCategories: Category[];
 }
 
-export function ArchivedClient({ initialNotes, initialCategories }: ArchivedClientProps) {
+export function ArchivedNotes({
+  initialNotes,
+  initialCategories,
+}: ArchivedNotesProps) {
   const [notes, setNotes] = useState(initialNotes);
   const [categories] = useState(initialCategories);
 
@@ -18,13 +21,17 @@ export function ArchivedClient({ initialNotes, initialCategories }: ArchivedClie
   const deleteNoteDialog = useConfirmDialog<Note>();
   const noteOps = useNoteOperations(setNotes);
 
-  const handleUpdateNote = async (data: { title: string; content: string; categoryIds: number[] }) => {
+  const handleUpdateNote = async (data: {
+    title: string;
+    content: string;
+    categoryIds: number[];
+  }) => {
     if (!noteModal.editingNote) return;
     try {
       await noteOps.handleUpdate(noteModal.editingNote.id, data);
       noteModal.close();
     } catch (error) {
-      console.error('Failed to update note:', error);
+      console.error("Failed to update note:", error);
     }
   };
 
@@ -34,7 +41,7 @@ export function ArchivedClient({ initialNotes, initialCategories }: ArchivedClie
       await noteOps.handleDelete(deleteNoteDialog.item.id);
       deleteNoteDialog.close();
     } catch (error) {
-      console.error('Failed to delete note:', error);
+      console.error("Failed to delete note:", error);
     }
   };
 
@@ -43,7 +50,7 @@ export function ArchivedClient({ initialNotes, initialCategories }: ArchivedClie
       await unarchiveNote(id);
       noteOps.handleRemoveFromList(id);
     } catch (error) {
-      console.error('Failed to unarchive note:', error);
+      console.error("Failed to unarchive note:", error);
     }
   };
 
@@ -63,7 +70,11 @@ export function ArchivedClient({ initialNotes, initialCategories }: ArchivedClie
         onRemoveCategory={noteOps.handleRemoveCategory}
       />
 
-      <Modal isOpen={noteModal.isOpen} onClose={noteModal.close} title="Edit Note">
+      <Modal
+        isOpen={noteModal.isOpen}
+        onClose={noteModal.close}
+        title="Edit Note"
+      >
         <NoteForm
           note={noteModal.editingNote || undefined}
           categories={categories}

@@ -1,23 +1,36 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { Note, Category, createNote, archiveNote, createCategory, deleteCategory } from '@/lib/api';
-import { NoteForm, Modal, CategoryFilter, ConfirmDialog, NotesGrid } from '@/components';
-import { MobileHeader, DesktopHeader } from '@/components/notes';
-import { useNoteModal, useConfirmDialog, useNoteOperations } from '@/hooks';
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Note,
+  Category,
+  createNote,
+  archiveNote,
+  createCategory,
+  deleteCategory,
+} from "@/lib/api";
+import {
+  NoteForm,
+  Modal,
+  CategoryFilter,
+  ConfirmDialog,
+  NotesGrid,
+} from "@/components";
+import { MobileHeader, DesktopHeader } from "@/components/notes";
+import { useNoteModal, useConfirmDialog, useNoteOperations } from "@/hooks";
 
-interface NotesClientProps {
+interface NotesProps {
   initialNotes: Note[];
   initialCategories: Category[];
   selectedCategoryId?: number;
 }
 
-export function NotesClient({
+export function Notes({
   initialNotes,
   initialCategories,
   selectedCategoryId,
-}: NotesClientProps) {
+}: NotesProps) {
   const router = useRouter();
 
   const [notes, setNotes] = useState(initialNotes);
@@ -30,31 +43,39 @@ export function NotesClient({
   const noteOps = useNoteOperations(setNotes);
 
   const selectedCategoryName = selectedCategoryId
-    ? categories.find((c) => c.id === selectedCategoryId)?.name ?? null
+    ? (categories.find((c) => c.id === selectedCategoryId)?.name ?? null)
     : null;
 
   const handleSelectCategory = (id: number | null) => {
-    router.push(id ? `/?category=${id}` : '/');
+    router.push(id ? `/?category=${id}` : "/");
     setShowSidebar(false);
   };
 
-  const handleCreateNote = async (data: { title: string; content: string; categoryIds: number[] }) => {
+  const handleCreateNote = async (data: {
+    title: string;
+    content: string;
+    categoryIds: number[];
+  }) => {
     try {
       const newNote = await createNote(data);
       setNotes((prev) => [newNote, ...prev]);
       noteModal.close();
     } catch (error) {
-      console.error('Failed to create note:', error);
+      console.error("Failed to create note:", error);
     }
   };
 
-  const handleUpdateNote = async (data: { title: string; content: string; categoryIds: number[] }) => {
+  const handleUpdateNote = async (data: {
+    title: string;
+    content: string;
+    categoryIds: number[];
+  }) => {
     if (!noteModal.editingNote) return;
     try {
       await noteOps.handleUpdate(noteModal.editingNote.id, data);
       noteModal.close();
     } catch (error) {
-      console.error('Failed to update note:', error);
+      console.error("Failed to update note:", error);
     }
   };
 
@@ -64,7 +85,7 @@ export function NotesClient({
       await noteOps.handleDelete(deleteNoteDialog.item.id);
       deleteNoteDialog.close();
     } catch (error) {
-      console.error('Failed to delete note:', error);
+      console.error("Failed to delete note:", error);
     }
   };
 
@@ -73,7 +94,7 @@ export function NotesClient({
       await archiveNote(id);
       noteOps.handleRemoveFromList(id);
     } catch (error) {
-      console.error('Failed to archive note:', error);
+      console.error("Failed to archive note:", error);
     }
   };
 
@@ -82,7 +103,7 @@ export function NotesClient({
       const newCategory = await createCategory(name);
       setCategories((prev) => [...prev, newCategory]);
     } catch (error) {
-      console.error('Failed to create category:', error);
+      console.error("Failed to create category:", error);
     }
   };
 
@@ -90,13 +111,15 @@ export function NotesClient({
     if (!deleteCategoryDialog.item) return;
     try {
       await deleteCategory(deleteCategoryDialog.item.id);
-      setCategories((prev) => prev.filter((c) => c.id !== deleteCategoryDialog.item!.id));
+      setCategories((prev) =>
+        prev.filter((c) => c.id !== deleteCategoryDialog.item!.id)
+      );
       if (selectedCategoryId === deleteCategoryDialog.item.id) {
-        router.push('/');
+        router.push("/");
       }
       deleteCategoryDialog.close();
     } catch (error) {
-      console.error('Failed to delete category:', error);
+      console.error("Failed to delete category:", error);
     }
   };
 
@@ -108,7 +131,9 @@ export function NotesClient({
         onCreateNote={noteModal.openCreate}
       />
 
-      <aside className={`${showSidebar ? 'block' : 'hidden'} lg:block w-full lg:w-56 shrink-0`}>
+      <aside
+        className={`${showSidebar ? "block" : "hidden"} lg:block w-full lg:w-56 shrink-0`}
+      >
         <CategoryFilter
           categories={categories}
           selectedCategory={selectedCategoryId ?? null}
@@ -123,7 +148,7 @@ export function NotesClient({
 
       <main className="flex-1 min-w-0">
         <DesktopHeader
-          title={selectedCategoryName || 'All Active Notes'}
+          title={selectedCategoryName || "All Active Notes"}
           onCreateNote={noteModal.openCreate}
         />
 
@@ -140,7 +165,7 @@ export function NotesClient({
       <Modal
         isOpen={noteModal.isOpen}
         onClose={noteModal.close}
-        title={noteModal.isEditing ? 'Edit Note' : 'Create Note'}
+        title={noteModal.isEditing ? "Edit Note" : "Create Note"}
       >
         <NoteForm
           note={noteModal.editingNote || undefined}

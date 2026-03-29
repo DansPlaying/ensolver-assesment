@@ -1,5 +1,5 @@
 import { getArchivedNotes, getCategories } from "@/lib/api";
-import { ArchivedClient } from "./archived-notes";
+import { ArchivedNotes } from "./archived-notes";
 
 export default async function ArchivedPage() {
   const [notes, categories] = await Promise.all([
@@ -7,5 +7,5 @@ export default async function ArchivedPage() {
     getCategories(),
   ]);
 
-  return <ArchivedClient initialNotes={notes} initialCategories={categories} />;
+  return <ArchivedNotes initialNotes={notes} initialCategories={categories} />;
 }

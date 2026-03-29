@@ -1,5 +1,5 @@
 import { getNotes, getCategories } from "@/lib/api";
-import { NotesClient } from "./notes";
+import { Notes } from "./notes";
 
 export default async function HomePage({
   searchParams,
@@ -15,7 +15,7 @@ export default async function HomePage({
   ]);
 
   return (
-    <NotesClient
+    <Notes
       initialNotes={notes}
       initialCategories={categories}
       selectedCategoryId={categoryId}
