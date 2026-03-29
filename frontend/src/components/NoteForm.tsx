@@ -1,7 +1,17 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Note, Category } from '@/lib/api';
+
+const noteSchema = z.object({
+  title: z.string().min(1, 'Title is required').max(100, 'Title must be less than 100 characters'),
+  content: z.string().min(1, 'Content is required').max(5000, 'Content must be less than 5000 characters'),
+});
+
+type NoteFormData = z.infer<typeof noteSchema>;
 
 interface NoteFormProps {
   note?: Note;
@@ -11,25 +21,32 @@ interface NoteFormProps {
 }
 
 export function NoteForm({ note, categories, onSubmit, onCancel }: NoteFormProps) {
-  const [title, setTitle] = useState(note?.title || '');
-  const [content, setContent] = useState(note?.content || '');
   const [selectedCategories, setSelectedCategories] = useState<number[]>(
     note?.categories.map((c) => c.id) || []
   );
 
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors, isSubmitting },
+  } = useForm<NoteFormData>({
+    resolver: zodResolver(noteSchema),
+    defaultValues: {
+      title: note?.title || '',
+      content: note?.content || '',
+    },
+  });
+
   useEffect(() => {
     if (note) {
-      setTitle(note.title);
-      setContent(note.content);
+      reset({
+        title: note.title,
+        content: note.content,
+      });
       setSelectedCategories(note.categories.map((c) => c.id));
     }
-  }, [note]);
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!title.trim() || !content.trim()) return;
-    onSubmit({ title: title.trim(), content: content.trim(), categoryIds: selectedCategories });
-  };
+  }, [note, reset]);
 
   const toggleCategory = (categoryId: number) => {
     setSelectedCategories((prev) =>
@@ -39,8 +56,12 @@ export function NoteForm({ note, categories, onSubmit, onCancel }: NoteFormProps
     );
   };
 
+  const onFormSubmit = (data: NoteFormData) => {
+    onSubmit({ ...data, categoryIds: selectedCategories });
+  };
+
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+    <form onSubmit={handleSubmit(onFormSubmit)} className="space-y-3 sm:space-y-4">
       <div>
         <label htmlFor="title" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
           Title
@@ -48,11 +69,14 @@ export function NoteForm({ note, categories, onSubmit, onCancel }: NoteFormProps
         <input
           type="text"
           id="title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-          required
+          {...register('title')}
+          className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+            errors.title ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+          }`}
         />
+        {errors.title && (
+          <p className="mt-1 text-xs text-red-500">{errors.title.message}</p>
+        )}
       </div>
 
       <div>
@@ -61,12 +85,15 @@ export function NoteForm({ note, categories, onSubmit, onCancel }: NoteFormProps
         </label>
         <textarea
           id="content"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
+          {...register('content')}
           rows={4}
-          className="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500"
-          required
+          className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 ${
+            errors.content ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
+          }`}
         />
+        {errors.content && (
+          <p className="mt-1 text-xs text-red-500">{errors.content.message}</p>
+        )}
       </div>
 
       {categories.length > 0 && (
@@ -103,7 +130,8 @@ export function NoteForm({ note, categories, onSubmit, onCancel }: NoteFormProps
         </button>
         <button
           type="submit"
-          className="px-3 sm:px-4 py-2 text-sm font-medium text-white bg-primary-500 rounded-lg hover:bg-primary-600"
+          disabled={isSubmitting}
+          className="px-3 sm:px-4 py-2 text-sm font-medium text-white bg-primary-500 rounded-lg hover:bg-primary-600 disabled:opacity-50"
         >
           {note ? 'Update' : 'Create'}
         </button>
