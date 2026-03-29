@@ -17,16 +17,17 @@ export function MobileHeader({
     <div className="lg:hidden flex items-center justify-between">
       <button
         onClick={onToggleSidebar}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg"
-        title="Filter by category"
+        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500"
+        aria-label="Filter by category"
+        aria-expanded="false"
       >
-        <FilterIcon />
+        <FilterIcon aria-hidden="true" />
         {categoryName || 'All Categories'}
       </button>
       <button
         onClick={onCreateNote}
-        className="px-4 py-2 bg-primary-500 text-white text-sm rounded-lg hover:bg-primary-600 font-medium"
-        title="Create new note"
+        className="px-4 py-2 bg-primary-500 text-white text-sm rounded-lg hover:bg-primary-600 font-medium focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
+        aria-label="Create new note"
       >
         + New
       </button>

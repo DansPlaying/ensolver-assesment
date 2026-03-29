@@ -70,12 +70,14 @@ export function NoteForm({ note, categories, onSubmit, onCancel }: NoteFormProps
           type="text"
           id="title"
           {...register('title')}
+          aria-invalid={errors.title ? 'true' : 'false'}
+          aria-describedby={errors.title ? 'title-error' : undefined}
           className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 ${
             errors.title ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
           }`}
         />
         {errors.title && (
-          <p className="mt-1 text-xs text-red-500">{errors.title.message}</p>
+          <p id="title-error" className="mt-1 text-xs text-red-500" role="alert">{errors.title.message}</p>
         )}
       </div>
 
@@ -87,27 +89,30 @@ export function NoteForm({ note, categories, onSubmit, onCancel }: NoteFormProps
           id="content"
           {...register('content')}
           rows={4}
+          aria-invalid={errors.content ? 'true' : 'false'}
+          aria-describedby={errors.content ? 'content-error' : undefined}
           className={`w-full px-3 py-2 text-sm border rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary-500 ${
             errors.content ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
           }`}
         />
         {errors.content && (
-          <p className="mt-1 text-xs text-red-500">{errors.content.message}</p>
+          <p id="content-error" className="mt-1 text-xs text-red-500" role="alert">{errors.content.message}</p>
         )}
       </div>
 
       {categories.length > 0 && (
-        <div>
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+        <fieldset>
+          <legend className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
             Categories
-          </label>
-          <div className="flex flex-wrap gap-2">
+          </legend>
+          <div className="flex flex-wrap gap-2" role="group" aria-label="Select categories">
             {categories.map((category) => (
               <button
                 key={category.id}
                 type="button"
                 onClick={() => toggleCategory(category.id)}
-                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors ${
+                aria-pressed={selectedCategories.includes(category.id)}
+                className={`px-3 py-1 rounded-full text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 ${
                   selectedCategories.includes(category.id)
                     ? 'bg-primary-500 text-white'
                     : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600'
@@ -117,21 +122,21 @@ export function NoteForm({ note, categories, onSubmit, onCancel }: NoteFormProps
               </button>
             ))}
           </div>
-        </div>
+        </fieldset>
       )}
 
       <div className="flex justify-end gap-2 pt-3 sm:pt-4">
         <button
           type="button"
           onClick={onCancel}
-          className="px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600"
+          className="px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-3 sm:px-4 py-2 text-sm font-medium text-white bg-primary-500 rounded-lg hover:bg-primary-600 disabled:opacity-50"
+          className="px-3 sm:px-4 py-2 text-sm font-medium text-white bg-primary-500 rounded-lg hover:bg-primary-600 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
         >
           {note ? 'Update' : 'Create'}
         </button>

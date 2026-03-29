@@ -68,7 +68,11 @@ export default function LoginPage() {
           className="mt-8 space-y-6 bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md"
         >
           {error && (
-            <div className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-3 rounded-md text-sm">
+            <div
+              className="bg-red-50 dark:bg-red-900/30 text-red-600 dark:text-red-400 p-3 rounded-md text-sm"
+              role="alert"
+              aria-live="assertive"
+            >
               {error}
             </div>
           )}
@@ -85,11 +89,13 @@ export default function LoginPage() {
               type="email"
               id="email"
               autoComplete="email"
+              aria-invalid={errors.email ? "true" : "false"}
+              aria-describedby={errors.email ? "email-error" : undefined}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="admin@example.com"
             />
             {errors.email && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+              <p id="email-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
                 {errors.email.message}
               </p>
             )}
@@ -107,11 +113,13 @@ export default function LoginPage() {
               type="password"
               id="password"
               autoComplete="current-password"
+              aria-invalid={errors.password ? "true" : "false"}
+              aria-describedby={errors.password ? "password-error" : undefined}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Enter your password"
             />
             {errors.password && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
+              <p id="password-error" className="mt-1 text-sm text-red-600 dark:text-red-400" role="alert">
                 {errors.password.message}
               </p>
             )}

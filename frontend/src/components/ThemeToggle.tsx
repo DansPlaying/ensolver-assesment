@@ -21,10 +21,10 @@ export function ThemeToggle() {
   return (
     <button
       onClick={toggleTheme}
-      className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-800 transition-colors"
-      title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-gray-100 dark:hover:bg-gray-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1"
+      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
     >
-      {isDark ? <SunIcon /> : <MoonIcon />}
+      {isDark ? <SunIcon aria-hidden="true" /> : <MoonIcon aria-hidden="true" />}
     </button>
   );
 }

@@ -16,10 +16,10 @@ export function CategoryBadge({ category, onRemove }: CategoryBadgeProps) {
             e.stopPropagation();
             onRemove();
           }}
-          className="hover:text-primary-600 dark:hover:text-primary-400"
-          title="Remove category"
+          className="hover:text-primary-600 dark:hover:text-primary-400 focus:outline-none focus:ring-1 focus:ring-primary-500 rounded"
+          aria-label={`Remove ${category.name} category`}
         >
-          <XIcon />
+          <XIcon aria-hidden="true" />
         </button>
       )}
     </span>

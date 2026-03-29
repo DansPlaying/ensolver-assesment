@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { Note, Category } from '@/lib/api';
-import { CategoryBadge } from './CategoryBadge';
-import { EditIcon, ArchiveIcon, TrashIcon } from './icons';
+import { Note, Category } from "@/lib/api";
+import { CategoryBadge } from "./CategoryBadge";
+import { EditIcon, ArchiveIcon, TrashIcon } from "./icons";
 
 interface NoteCardProps {
   note: Note;
@@ -25,32 +25,34 @@ export function NoteCard({
         <h3 className="text-base font-semibold text-gray-900 dark:text-white line-clamp-1">
           {note.title}
         </h3>
-        <div className="flex gap-0.5 flex-shrink-0">
+        <div className="flex gap-0.5 shrink-0">
           <button
             onClick={onEdit}
-            className="p-1.5 text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400"
-            title="Edit"
+            className="p-1.5 text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 rounded"
+            aria-label="Edit note"
           >
-            <EditIcon />
+            <EditIcon aria-hidden="true" />
           </button>
           <button
             onClick={onArchive}
-            className="p-1.5 text-gray-500 hover:text-yellow-600 dark:text-gray-400 dark:hover:text-yellow-400"
-            title={note.isArchived ? 'Unarchive' : 'Archive'}
+            className="p-1.5 text-gray-500 hover:text-yellow-600 dark:text-gray-400 dark:hover:text-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-1 rounded"
+            aria-label={note.isArchived ? "Unarchive note" : "Archive note"}
           >
-            <ArchiveIcon />
+            <ArchiveIcon aria-hidden="true" />
           </button>
           <button
             onClick={onDelete}
-            className="p-1.5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400"
-            title="Delete"
+            className="p-1.5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1 rounded"
+            aria-label="Delete note"
           >
-            <TrashIcon />
+            <TrashIcon aria-hidden="true" />
           </button>
         </div>
       </div>
 
-      <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-2">{note.content}</p>
+      <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-2">
+        {note.content}
+      </p>
 
       {note.categories.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-2">

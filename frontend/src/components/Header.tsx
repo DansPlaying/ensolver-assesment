@@ -21,10 +21,11 @@ export function Header() {
             Notes
           </Link>
           <div className="flex items-center gap-1 sm:gap-2">
-            <nav className="flex">
+            <nav aria-label="Main navigation" className="flex">
               <Link
                 href="/"
-                className={`px-2 sm:px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                aria-current={pathname === '/' ? 'page' : undefined}
+                className={`px-2 sm:px-3 py-1.5 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                   pathname === '/'
                     ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
                     : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
@@ -34,7 +35,8 @@ export function Header() {
               </Link>
               <Link
                 href="/archived"
-                className={`px-2 sm:px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                aria-current={pathname === '/archived' ? 'page' : undefined}
+                className={`px-2 sm:px-3 py-1.5 rounded-md text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500 ${
                   pathname === '/archived'
                     ? 'bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white'
                     : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
@@ -47,8 +49,8 @@ export function Header() {
             {session && (
               <button
                 onClick={() => signOut({ callbackUrl: '/login' })}
-                className="px-2 sm:px-3 py-1.5 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
-                title="Sign out of your account"
+                className="px-2 sm:px-3 py-1.5 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
+                aria-label="Sign out of your account"
               >
                 Sign out
               </button>

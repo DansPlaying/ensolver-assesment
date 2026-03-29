@@ -1,6 +1,11 @@
-export function FilterIcon({ className = 'w-4 h-4' }: { className?: string }) {
+interface IconProps {
+  className?: string;
+  'aria-hidden'?: boolean | 'true' | 'false';
+}
+
+export function FilterIcon({ className = 'w-4 h-4', 'aria-hidden': ariaHidden }: IconProps) {
   return (
-    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden={ariaHidden}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
