@@ -1,6 +1,7 @@
 import {
   Injectable,
   UnauthorizedException,
+  ConflictException,
   OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,7 +9,7 @@ import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { User } from '../entities/user.entity';
-import { LoginDto } from './dto';
+import { LoginDto, RegisterDto } from './dto';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -64,5 +65,31 @@ export class AuthService implements OnModuleInit {
 
   async findById(id: number): Promise<User | null> {
     return this.usersRepository.findOne({ where: { id } });
+  }
+
+  async register(registerDto: RegisterDto) {
+    const existingUser = await this.usersRepository.findOne({
+      where: { email: registerDto.email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('Email already registered');
+    }
+
+    const hashedPassword = await bcrypt.hash(registerDto.password, 10);
+    const user = this.usersRepository.create({
+      email: registerDto.email,
+      password: hashedPassword,
+    });
+    await this.usersRepository.save(user);
+
+    const payload = { sub: user.id, email: user.email };
+    return {
+      access_token: this.jwtService.sign(payload),
+      user: {
+        id: user.id,
+        email: user.email,
+      },
+    };
   }
 }

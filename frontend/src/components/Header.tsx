@@ -1,15 +1,18 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { signOut, useSession } from 'next-auth/react';
 import { ThemeToggle } from './ThemeToggle';
+import { ConfirmDialog } from './ConfirmDialog';
 
 export function Header() {
   const pathname = usePathname();
   const { data: session } = useSession();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  if (pathname === '/login') {
+  if (pathname === '/login' || pathname === '/register') {
     return null;
   }
 
@@ -48,7 +51,7 @@ export function Header() {
             <ThemeToggle />
             {session && (
               <button
-                onClick={() => signOut({ callbackUrl: '/login' })}
+                onClick={() => setShowLogoutConfirm(true)}
                 className="px-2 sm:px-3 py-1.5 rounded-md text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-primary-500"
                 aria-label="Sign out of your account"
               >
@@ -58,6 +61,17 @@ export function Header() {
           </div>
         </div>
       </div>
+
+      <ConfirmDialog
+        isOpen={showLogoutConfirm}
+        title="Sign out"
+        message="Are you sure you want to sign out?"
+        confirmLabel="Sign out"
+        cancelLabel="Cancel"
+        variant="warning"
+        onConfirm={() => signOut({ callbackUrl: '/login' })}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
     </header>
   );
 }
