@@ -26,7 +26,7 @@ export default function ForgotPasswordPage() {
     resolver: zodResolver(forgotPasswordSchema),
   });
 
-  const onSubmit = async (data: ForgotPasswordForm) => {
+  const onSubmit = async (formData: ForgotPasswordForm) => {
     setIsLoading(true);
     setError(null);
 
@@ -36,22 +36,23 @@ export default function ForgotPasswordPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: data.email }),
+        body: JSON.stringify({ email: formData.email }),
       });
 
+      const responseData = await response.json();
+
       if (!response.ok) {
-        throw new Error("Failed to send reset email");
+        throw new Error(responseData.message || "Failed to send reset email");
       }
 
-      const data = await response.json();
-
       // If in test mode, save the reset URL
-      if (data.testMode && data.resetUrl) {
-        setTestResetUrl(data.resetUrl);
+      if (responseData.testMode && responseData.resetUrl) {
+        setTestResetUrl(responseData.resetUrl);
       }
 
       setIsSuccess(true);
-    } catch {
+    } catch (err) {
+      console.error("Forgot password error:", err);
       setError("An error occurred. Please try again.");
     } finally {
       setIsLoading(false);
