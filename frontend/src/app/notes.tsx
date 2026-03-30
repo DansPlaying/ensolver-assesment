@@ -67,6 +67,11 @@ export function Notes({
     : null;
 
   const handleSelectCategory = (id: number | null) => {
+    // Skip if clicking the already-selected category
+    if (id === (selectedCategoryId ?? null)) {
+      setShowSidebar(false);
+      return;
+    }
     setIsFilteringCategory(true);
     router.push(id ? `/?category=${id}` : "/");
     setShowSidebar(false);
