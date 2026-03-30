@@ -40,6 +40,10 @@ export function Notes({
   const [notes, setNotes] = useState(initialNotes);
   const [categories, setCategories] = useState(initialCategories);
   const [showSidebar, setShowSidebar] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDeletingNote, setIsDeletingNote] = useState(false);
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [isDeletingCategory, setIsDeletingCategory] = useState(false);
 
   // Sync state when server data changes (e.g., after navigation/filtering)
   useEffect(() => {
@@ -69,6 +73,7 @@ export function Notes({
     content: string;
     categoryIds: number[];
   }) => {
+    setIsSubmitting(true);
     try {
       const newNote = await createNote(data, accessToken);
       setNotes((prev) => [newNote, ...prev]);
@@ -77,6 +82,8 @@ export function Notes({
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to create note";
       toast.error(message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -86,6 +93,7 @@ export function Notes({
     categoryIds: number[];
   }) => {
     if (!noteModal.editingNote) return;
+    setIsSubmitting(true);
     try {
       await noteOps.handleUpdate(noteModal.editingNote.id, data);
       noteModal.close();
@@ -93,11 +101,14 @@ export function Notes({
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to update note";
       toast.error(message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   const handleDeleteNote = async () => {
     if (!deleteNoteDialog.item) return;
+    setIsDeletingNote(true);
     try {
       await noteOps.handleDelete(deleteNoteDialog.item.id);
       deleteNoteDialog.close();
@@ -105,6 +116,8 @@ export function Notes({
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to delete note";
       toast.error(message);
+    } finally {
+      setIsDeletingNote(false);
     }
   };
 
@@ -120,6 +133,7 @@ export function Notes({
   };
 
   const handleCreateCategory = async (name: string) => {
+    setIsCreatingCategory(true);
     try {
       const newCategory = await createCategory(name, accessToken);
       setCategories((prev) => [...prev, newCategory]);
@@ -127,12 +141,15 @@ export function Notes({
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to create category";
       toast.error(message);
+    } finally {
+      setIsCreatingCategory(false);
     }
   };
 
   const handleDeleteCategory = async () => {
     if (!deleteCategoryDialog.item) return;
     const categoryName = deleteCategoryDialog.item.name;
+    setIsDeletingCategory(true);
     try {
       await deleteCategory(deleteCategoryDialog.item.id, accessToken);
       setCategories((prev) =>
@@ -144,9 +161,10 @@ export function Notes({
       deleteCategoryDialog.close();
       toast.success(`Category "${categoryName}" deleted successfully`);
     } catch (error) {
-      deleteCategoryDialog.close();
       const message = error instanceof Error ? error.message : "Failed to delete category";
       toast.error(message);
+    } finally {
+      setIsDeletingCategory(false);
     }
   };
 
@@ -170,6 +188,7 @@ export function Notes({
             const category = categories.find((c) => c.id === id);
             if (category) deleteCategoryDialog.open(category);
           }}
+          isCreating={isCreatingCategory}
         />
       </aside>
 
@@ -199,6 +218,7 @@ export function Notes({
           categories={categories}
           onSubmit={noteModal.isEditing ? handleUpdateNote : handleCreateNote}
           onCancel={noteModal.close}
+          isLoading={isSubmitting}
         />
       </Modal>
 
@@ -209,6 +229,7 @@ export function Notes({
         confirmLabel="Delete"
         onConfirm={handleDeleteNote}
         onCancel={deleteNoteDialog.close}
+        isLoading={isDeletingNote}
       />
 
       <ConfirmDialog
@@ -218,6 +239,7 @@ export function Notes({
         confirmLabel="Delete"
         onConfirm={handleDeleteCategory}
         onCancel={deleteCategoryDialog.close}
+        isLoading={isDeletingCategory}
       />
     </div>
   );

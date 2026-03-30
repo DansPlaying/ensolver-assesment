@@ -17,8 +17,9 @@ interface CategoryFilterProps {
   categories: Category[];
   selectedCategory: number | null;
   onSelectCategory: (categoryId: number | null) => void;
-  onCreateCategory: (name: string) => void;
+  onCreateCategory: (name: string) => Promise<void>;
   onDeleteCategory: (id: number) => void;
+  isCreating?: boolean;
 }
 
 export function CategoryFilter({
@@ -27,6 +28,7 @@ export function CategoryFilter({
   onSelectCategory,
   onCreateCategory,
   onDeleteCategory,
+  isCreating = false,
 }: CategoryFilterProps) {
   const [isAdding, setIsAdding] = useState(false);
 
@@ -39,8 +41,8 @@ export function CategoryFilter({
     resolver: zodResolver(categorySchema),
   });
 
-  const onFormSubmit = (data: CategoryFormData) => {
-    onCreateCategory(data.name);
+  const onFormSubmit = async (data: CategoryFormData) => {
+    await onCreateCategory(data.name);
     reset();
     setIsAdding(false);
   };
@@ -67,18 +69,20 @@ export function CategoryFilter({
               type="text"
               {...register('name')}
               placeholder="Category name"
+              disabled={isCreating}
               aria-label="New category name"
               aria-invalid={errors.name ? 'true' : 'false'}
               aria-describedby={errors.name ? 'category-name-error' : undefined}
-              className={`min-w-0 flex-1 px-2 py-1 text-sm border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500 ${
+              className={`min-w-0 flex-1 px-2 py-1 text-sm border rounded bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed ${
                 errors.name ? 'border-red-500' : 'border-gray-300 dark:border-gray-600'
               }`}
             />
             <button
               type="submit"
-              className="shrink-0 px-2 py-1 text-sm bg-primary-500 text-white rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1"
+              disabled={isCreating}
+              className="shrink-0 px-2 py-1 text-sm bg-primary-500 text-white rounded hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-1 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Add
+              {isCreating ? 'Adding...' : 'Add'}
             </button>
           </div>
           {errors.name && (
