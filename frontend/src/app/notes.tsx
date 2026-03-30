@@ -136,6 +136,7 @@ export function Notes({
       await archiveNote(id, accessToken);
       noteOps.handleRemoveFromList(id);
       toast.success("Note archived successfully");
+      router.refresh(); // Invalidate router cache for fresh data on navigation
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to archive note";
       toast.error(message);

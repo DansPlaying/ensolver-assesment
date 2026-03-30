@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Note, Category, unarchiveNote } from "@/lib/api";
 import { NoteForm, Modal, ConfirmDialog, NotesGrid } from "@/components";
 import { useNoteModal, useConfirmDialog, useNoteOperations } from "@/hooks";
@@ -17,6 +18,7 @@ export function ArchivedNotes({
   initialCategories,
   accessToken,
 }: ArchivedNotesProps) {
+  const router = useRouter();
   const toast = useToast();
   const [notes, setNotes] = useState(initialNotes);
   const [categories, setCategories] = useState(initialCategories);
@@ -69,6 +71,7 @@ export function ArchivedNotes({
       await unarchiveNote(id, accessToken);
       noteOps.handleRemoveFromList(id);
       toast.success("Note restored successfully");
+      router.refresh(); // Invalidate router cache for fresh data on navigation
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to restore note";
       toast.error(message);
