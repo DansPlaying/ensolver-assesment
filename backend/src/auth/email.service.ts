@@ -69,12 +69,21 @@ export class EmailService implements OnModuleInit {
 
     const info = await this.transporter.sendMail(mailOptions);
 
-    // If using Ethereal, log the preview URL
+    // If using Ethereal, log the preview URL and reset link for testing
     if (this.isEthereal) {
-      console.log('----------------------------------------');
-      console.log('PASSWORD RESET EMAIL SENT (Test Mode)');
-      console.log('Preview URL:', nodemailer.getTestMessageUrl(info));
-      console.log('----------------------------------------');
+      console.log('');
+      console.log('========================================');
+      console.log('  PASSWORD RESET EMAIL (Test Mode)');
+      console.log('========================================');
+      console.log('To:', email);
+      console.log('');
+      console.log('Reset Link (for testing):');
+      console.log(resetUrl);
+      console.log('');
+      console.log('Email Preview (Ethereal):');
+      console.log(nodemailer.getTestMessageUrl(info));
+      console.log('========================================');
+      console.log('');
     }
   }
 }
