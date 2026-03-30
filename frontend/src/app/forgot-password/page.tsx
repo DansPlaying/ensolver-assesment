@@ -16,6 +16,7 @@ export default function ForgotPasswordPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [testResetUrl, setTestResetUrl] = useState<string | null>(null);
 
   const {
     register,
@@ -42,6 +43,13 @@ export default function ForgotPasswordPage() {
         throw new Error("Failed to send reset email");
       }
 
+      const data = await response.json();
+
+      // If in test mode, save the reset URL
+      if (data.testMode && data.resetUrl) {
+        setTestResetUrl(data.resetUrl);
+      }
+
       setIsSuccess(true);
     } catch {
       setError("An error occurred. Please try again.");
@@ -65,6 +73,20 @@ export default function ForgotPasswordPage() {
               The link will expire in 1 hour.
             </p>
           </div>
+
+          {testResetUrl && (
+            <div className="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-200 dark:border-yellow-800 p-4 rounded-lg">
+              <p className="text-sm font-medium text-yellow-800 dark:text-yellow-200 mb-2">
+                Testing Mode - Reset Link:
+              </p>
+              <a
+                href={testResetUrl}
+                className="text-sm text-blue-600 hover:text-blue-500 dark:text-blue-400 dark:hover:text-blue-300 break-all"
+              >
+                {testResetUrl}
+              </a>
+            </div>
+          )}
 
           <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-md text-center">
             <Link

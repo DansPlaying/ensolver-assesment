@@ -102,6 +102,8 @@ export class AuthService implements OnModuleInit {
       where: { email: forgotPasswordDto.email },
     });
 
+    const isTestMode = this.emailService.isTestMode();
+
     // Always return success to prevent email enumeration
     if (!user) {
       return { message: 'If the email exists, a reset link has been sent' };
@@ -116,7 +118,16 @@ export class AuthService implements OnModuleInit {
     await this.usersRepository.save(user);
 
     // Send email
-    await this.emailService.sendPasswordResetEmail(user.email, resetToken);
+    const { resetUrl } = await this.emailService.sendPasswordResetEmail(user.email, resetToken);
+
+    // In test mode, return the reset URL for easy testing
+    if (isTestMode) {
+      return {
+        message: 'If the email exists, a reset link has been sent',
+        testMode: true,
+        resetUrl,
+      };
+    }
 
     return { message: 'If the email exists, a reset link has been sent' };
   }

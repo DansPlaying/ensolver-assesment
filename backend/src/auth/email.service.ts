@@ -41,7 +41,11 @@ export class EmailService implements OnModuleInit {
     }
   }
 
-  async sendPasswordResetEmail(email: string, token: string): Promise<void> {
+  isTestMode(): boolean {
+    return this.isEthereal;
+  }
+
+  async sendPasswordResetEmail(email: string, token: string): Promise<{ resetUrl: string }> {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
 
@@ -85,5 +89,7 @@ export class EmailService implements OnModuleInit {
       console.log('========================================');
       console.log('');
     }
+
+    return { resetUrl };
   }
 }
