@@ -2,14 +2,17 @@ import {
   Injectable,
   UnauthorizedException,
   ConflictException,
+  BadRequestException,
   OnModuleInit,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThan } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { User } from '../entities/user.entity';
-import { LoginDto, RegisterDto } from './dto';
+import { LoginDto, RegisterDto, ForgotPasswordDto, ResetPasswordDto } from './dto';
+import { EmailService } from './email.service';
 
 @Injectable()
 export class AuthService implements OnModuleInit {
@@ -17,6 +20,7 @@ export class AuthService implements OnModuleInit {
     @InjectRepository(User)
     private usersRepository: Repository<User>,
     private jwtService: JwtService,
+    private emailService: EmailService,
   ) {}
 
   async onModuleInit() {
@@ -91,5 +95,50 @@ export class AuthService implements OnModuleInit {
         email: user.email,
       },
     };
+  }
+
+  async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
+    const user = await this.usersRepository.findOne({
+      where: { email: forgotPasswordDto.email },
+    });
+
+    // Always return success to prevent email enumeration
+    if (!user) {
+      return { message: 'If the email exists, a reset link has been sent' };
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
+
+    user.resetToken = resetToken;
+    user.resetTokenExpiry = resetTokenExpiry;
+    await this.usersRepository.save(user);
+
+    // Send email
+    await this.emailService.sendPasswordResetEmail(user.email, resetToken);
+
+    return { message: 'If the email exists, a reset link has been sent' };
+  }
+
+  async resetPassword(resetPasswordDto: ResetPasswordDto) {
+    const user = await this.usersRepository.findOne({
+      where: {
+        resetToken: resetPasswordDto.token,
+        resetTokenExpiry: MoreThan(new Date()),
+      },
+    });
+
+    if (!user) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    // Update password
+    user.password = await bcrypt.hash(resetPasswordDto.password, 10);
+    user.resetToken = null as unknown as string;
+    user.resetTokenExpiry = null as unknown as Date;
+    await this.usersRepository.save(user);
+
+    return { message: 'Password has been reset successfully' };
   }
 }

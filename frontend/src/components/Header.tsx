@@ -12,7 +12,8 @@ export function Header() {
   const { data: session } = useSession();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
-  if (pathname === '/login' || pathname === '/register') {
+  const authPages = ['/login', '/register', '/forgot-password', '/reset-password'];
+  if (authPages.includes(pathname)) {
     return null;
   }
 
