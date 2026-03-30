@@ -57,7 +57,14 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+      if (!apiUrl) {
+        setError("API URL not configured");
+        setIsLoading(false);
+        return;
+      }
+
+      const response = await fetch(`${apiUrl}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -75,6 +82,7 @@ export default function RegisterPage() {
         } else {
           setError(errorData.message || "Registration failed");
         }
+        setIsLoading(false);
         return;
       }
 
@@ -91,9 +99,9 @@ export default function RegisterPage() {
         router.push("/");
         router.refresh();
       }
-    } catch {
-      setError("An error occurred. Please try again.");
-    } finally {
+    } catch (err) {
+      console.error("Registration error:", err);
+      setError("Connection error. Please check your internet and try again.");
       setIsLoading(false);
     }
   };

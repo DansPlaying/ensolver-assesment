@@ -16,11 +16,12 @@ type NoteFormData = z.infer<typeof noteSchema>;
 interface NoteFormProps {
   note?: Note;
   categories: Category[];
-  onSubmit: (data: { title: string; content: string; categoryIds: number[] }) => void;
+  onSubmit: (data: { title: string; content: string; categoryIds: number[] }) => Promise<void>;
   onCancel: () => void;
+  isLoading?: boolean;
 }
 
-export function NoteForm({ note, categories, onSubmit, onCancel }: NoteFormProps) {
+export function NoteForm({ note, categories, onSubmit, onCancel, isLoading = false }: NoteFormProps) {
   const [selectedCategories, setSelectedCategories] = useState<number[]>(
     note?.categories.map((c) => c.id) || []
   );
@@ -129,16 +130,17 @@ export function NoteForm({ note, categories, onSubmit, onCancel }: NoteFormProps
         <button
           type="button"
           onClick={onCancel}
-          className="px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+          disabled={isLoading}
+          className="px-3 sm:px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50"
         >
           Cancel
         </button>
         <button
           type="submit"
-          disabled={isSubmitting}
+          disabled={isSubmitting || isLoading}
           className="px-3 sm:px-4 py-2 text-sm font-medium text-white bg-primary-500 rounded-lg hover:bg-primary-600 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2"
         >
-          {note ? 'Update' : 'Create'}
+          {isLoading ? (note ? 'Updating...' : 'Creating...') : (note ? 'Update' : 'Create')}
         </button>
       </div>
     </form>

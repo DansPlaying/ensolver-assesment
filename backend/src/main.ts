@@ -12,7 +12,15 @@ async function bootstrap() {
     : ['http://localhost:3000', 'http://localhost:3001'];
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: (origin: string | undefined, callback: (err: Error | null, allow?: boolean) => void) => {
+      // Allow requests with no origin (mobile apps, curl, etc)
+      if (!origin) return callback(null, true);
+      // Allow all netlify.app subdomains and configured origins
+      if (origin.endsWith('.netlify.app') || allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      callback(null, false);
+    },
     credentials: true,
   });
 

@@ -10,6 +10,7 @@ interface ConfirmDialogProps {
   confirmLabel?: string;
   cancelLabel?: string;
   variant?: 'danger' | 'warning';
+  isLoading?: boolean;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -21,6 +22,7 @@ export function ConfirmDialog({
   confirmLabel = 'Delete',
   cancelLabel = 'Cancel',
   variant = 'danger',
+  isLoading = false,
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
@@ -130,7 +132,8 @@ export function ConfirmDialog({
             <button
               type="button"
               onClick={onCancel}
-              className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"
+              disabled={isLoading}
+              className="px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 disabled:opacity-50"
             >
               {cancelLabel}
             </button>
@@ -138,13 +141,14 @@ export function ConfirmDialog({
               ref={confirmButtonRef}
               type="button"
               onClick={onConfirm}
-              className={`px-3 py-2 text-sm font-medium text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              disabled={isLoading}
+              className={`px-3 py-2 text-sm font-medium text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 ${
                 variant === 'danger'
                   ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
                   : 'bg-yellow-600 hover:bg-yellow-700 focus:ring-yellow-500'
               }`}
             >
-              {confirmLabel}
+              {isLoading ? 'Deleting...' : confirmLabel}
             </button>
           </div>
         </div>
