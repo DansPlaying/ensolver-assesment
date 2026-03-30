@@ -2,7 +2,7 @@
 
 import { Note, Category } from "@/lib/api";
 import { CategoryBadge } from "./CategoryBadge";
-import { EditIcon, ArchiveIcon, TrashIcon } from "./icons";
+import { EditIcon, ArchiveIcon, UnarchiveIcon, TrashIcon } from "./icons";
 
 interface NoteCardProps {
   note: Note;
@@ -10,6 +10,7 @@ interface NoteCardProps {
   onDelete: () => void;
   onArchive: () => void;
   onRemoveCategory?: (categoryId: number) => void;
+  isArchiving?: boolean;
 }
 
 export function NoteCard({
@@ -18,6 +19,7 @@ export function NoteCard({
   onDelete,
   onArchive,
   onRemoveCategory,
+  isArchiving = false,
 }: NoteCardProps) {
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-3 sm:p-4 hover:shadow-md transition-all">
@@ -35,10 +37,11 @@ export function NoteCard({
           </button>
           <button
             onClick={onArchive}
-            className="p-1.5 text-gray-500 hover:text-yellow-600 dark:text-gray-400 dark:hover:text-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-1 rounded"
-            aria-label={note.isArchived ? "Unarchive note" : "Archive note"}
+            disabled={isArchiving}
+            className={`p-1.5 text-gray-500 hover:text-yellow-600 dark:text-gray-400 dark:hover:text-yellow-400 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-1 rounded disabled:opacity-50 ${isArchiving ? 'animate-pulse' : ''}`}
+            aria-label={note.isArchived ? "Restore note" : "Archive note"}
           >
-            <ArchiveIcon aria-hidden="true" />
+            {note.isArchived ? <UnarchiveIcon aria-hidden="true" /> : <ArchiveIcon aria-hidden="true" />}
           </button>
           <button
             onClick={onDelete}

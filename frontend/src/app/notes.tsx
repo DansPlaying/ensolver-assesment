@@ -45,6 +45,7 @@ export function Notes({
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [isDeletingCategory, setIsDeletingCategory] = useState(false);
   const [isFilteringCategory, setIsFilteringCategory] = useState(false);
+  const [archivingNoteId, setArchivingNoteId] = useState<number | null>(null);
 
   // Sync state when server data changes (e.g., after navigation/filtering)
   useEffect(() => {
@@ -125,14 +126,16 @@ export function Notes({
   };
 
   const handleArchiveNote = async (id: number) => {
+    setArchivingNoteId(id);
     try {
       await archiveNote(id, accessToken);
       noteOps.handleRemoveFromList(id);
       toast.success("Note archived successfully");
-      router.push("/archived");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to archive note";
       toast.error(message);
+    } finally {
+      setArchivingNoteId(null);
     }
   };
 
@@ -210,6 +213,7 @@ export function Notes({
           onArchive={handleArchiveNote}
           onRemoveCategory={noteOps.handleRemoveCategory}
           isLoading={isFilteringCategory}
+          archivingNoteId={archivingNoteId}
         />
       </main>
 

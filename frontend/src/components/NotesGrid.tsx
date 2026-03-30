@@ -12,6 +12,7 @@ interface NotesGridProps {
   onRemoveCategory: (noteId: number, categoryId: number) => void;
   columns?: 'default' | 'compact';
   isLoading?: boolean;
+  archivingNoteId?: number | null;
 }
 
 export function NotesGrid({
@@ -23,6 +24,7 @@ export function NotesGrid({
   onRemoveCategory,
   columns = 'default',
   isLoading = false,
+  archivingNoteId = null,
 }: NotesGridProps) {
   if (isLoading) {
     return (
@@ -60,6 +62,7 @@ export function NotesGrid({
           onDelete={() => onDelete(note)}
           onArchive={() => onArchive(note.id)}
           onRemoveCategory={(categoryId) => onRemoveCategory(note.id, categoryId)}
+          isArchiving={archivingNoteId === note.id}
         />
       ))}
     </div>

@@ -20,6 +20,7 @@ export function ArchivedNotes({
   const toast = useToast();
   const [notes, setNotes] = useState(initialNotes);
   const [categories, setCategories] = useState(initialCategories);
+  const [unarchivingNoteId, setUnarchivingNoteId] = useState<number | null>(null);
 
   // Sync state when server data changes
   useEffect(() => {
@@ -63,6 +64,7 @@ export function ArchivedNotes({
   };
 
   const handleUnarchiveNote = async (id: number) => {
+    setUnarchivingNoteId(id);
     try {
       await unarchiveNote(id, accessToken);
       noteOps.handleRemoveFromList(id);
@@ -70,6 +72,8 @@ export function ArchivedNotes({
     } catch (error) {
       const message = error instanceof Error ? error.message : "Failed to restore note";
       toast.error(message);
+    } finally {
+      setUnarchivingNoteId(null);
     }
   };
 
@@ -87,6 +91,7 @@ export function ArchivedNotes({
         onDelete={deleteNoteDialog.open}
         onArchive={handleUnarchiveNote}
         onRemoveCategory={noteOps.handleRemoveCategory}
+        archivingNoteId={unarchivingNoteId}
       />
 
       <Modal
