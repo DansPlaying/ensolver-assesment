@@ -98,38 +98,46 @@ export class AuthService implements OnModuleInit {
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
-    const user = await this.usersRepository.findOne({
-      where: { email: forgotPasswordDto.email },
-    });
+    try {
+      console.log('Forgot password request for:', forgotPasswordDto.email);
 
-    const isTestMode = this.emailService.isTestMode();
+      const user = await this.usersRepository.findOne({
+        where: { email: forgotPasswordDto.email },
+      });
 
-    // Always return success to prevent email enumeration
-    if (!user) {
+      const isTestMode = this.emailService.isTestMode();
+
+      // Always return success to prevent email enumeration
+      if (!user) {
+        console.log('User not found:', forgotPasswordDto.email);
+        return { message: 'If the email exists, a reset link has been sent' };
+      }
+
+      // Generate reset token
+      const resetToken = crypto.randomBytes(32).toString('hex');
+      const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
+
+      user.resetToken = resetToken;
+      user.resetTokenExpiry = resetTokenExpiry;
+      await this.usersRepository.save(user);
+
+      // Send email
+      const { resetUrl } = await this.emailService.sendPasswordResetEmail(user.email, resetToken);
+
+      // In test mode, return the reset URL for easy testing
+      if (isTestMode) {
+        return {
+          message: 'If the email exists, a reset link has been sent',
+          testMode: true,
+          resetUrl,
+        };
+      }
+
       return { message: 'If the email exists, a reset link has been sent' };
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      throw error;
     }
-
-    // Generate reset token
-    const resetToken = crypto.randomBytes(32).toString('hex');
-    const resetTokenExpiry = new Date(Date.now() + 3600000); // 1 hour
-
-    user.resetToken = resetToken;
-    user.resetTokenExpiry = resetTokenExpiry;
-    await this.usersRepository.save(user);
-
-    // Send email
-    const { resetUrl } = await this.emailService.sendPasswordResetEmail(user.email, resetToken);
-
-    // In test mode, return the reset URL for easy testing
-    if (isTestMode) {
-      return {
-        message: 'If the email exists, a reset link has been sent',
-        testMode: true,
-        resetUrl,
-      };
-    }
-
-    return { message: 'If the email exists, a reset link has been sent' };
   }
 
   async resetPassword(resetPasswordDto: ResetPasswordDto) {

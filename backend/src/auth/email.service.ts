@@ -5,39 +5,52 @@ import * as nodemailer from 'nodemailer';
 export class EmailService implements OnModuleInit {
   private transporter: nodemailer.Transporter;
   private isEthereal = false;
+  private initialized = false;
 
   async onModuleInit() {
     await this.initializeTransporter();
   }
 
   private async initializeTransporter() {
-    // If SMTP credentials are provided, use them
-    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-      this.transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || 'smtp.gmail.com',
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        secure: false,
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
-      console.log('Email service: Using configured SMTP');
-    } else {
-      // Use Ethereal for development (fake SMTP that captures emails)
-      const testAccount = await nodemailer.createTestAccount();
-      this.transporter = nodemailer.createTransport({
-        host: 'smtp.ethereal.email',
-        port: 587,
-        secure: false,
-        auth: {
-          user: testAccount.user,
-          pass: testAccount.pass,
-        },
-      });
-      this.isEthereal = true;
-      console.log('Email service: Using Ethereal (test mode)');
-      console.log('Ethereal credentials:', testAccount.user);
+    try {
+      // If SMTP credentials are provided, use them
+      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+        this.transporter = nodemailer.createTransport({
+          host: process.env.SMTP_HOST || 'smtp.gmail.com',
+          port: parseInt(process.env.SMTP_PORT || '587'),
+          secure: false,
+          auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+          },
+        });
+        console.log('Email service: Using configured SMTP');
+      } else {
+        // Use Ethereal for development (fake SMTP that captures emails)
+        console.log('Email service: Creating Ethereal test account...');
+        const testAccount = await nodemailer.createTestAccount();
+        this.transporter = nodemailer.createTransport({
+          host: 'smtp.ethereal.email',
+          port: 587,
+          secure: false,
+          auth: {
+            user: testAccount.user,
+            pass: testAccount.pass,
+          },
+        });
+        this.isEthereal = true;
+        console.log('Email service: Using Ethereal (test mode)');
+        console.log('Ethereal credentials:', testAccount.user);
+      }
+      this.initialized = true;
+    } catch (error) {
+      console.error('Email service initialization failed:', error);
+    }
+  }
+
+  private async ensureInitialized() {
+    if (!this.initialized) {
+      await this.initializeTransporter();
     }
   }
 
@@ -46,6 +59,8 @@ export class EmailService implements OnModuleInit {
   }
 
   async sendPasswordResetEmail(email: string, token: string): Promise<{ resetUrl: string }> {
+    await this.ensureInitialized();
+
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
 
@@ -71,7 +86,9 @@ export class EmailService implements OnModuleInit {
       `,
     };
 
+    console.log('Sending password reset email to:', email);
     const info = await this.transporter.sendMail(mailOptions);
+    console.log('Email sent successfully');
 
     // If using Ethereal, log the preview URL and reset link for testing
     if (this.isEthereal) {
