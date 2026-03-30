@@ -43,13 +43,14 @@ export default function LoginPage() {
 
       if (result?.error) {
         setError("Invalid email or password");
+        setIsLoading(false);
       } else {
+        // Keep loading state active during redirect
         router.push("/");
         router.refresh();
       }
     } catch {
       setError("An error occurred. Please try again.");
-    } finally {
       setIsLoading(false);
     }
   };

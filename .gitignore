@@ -37,3 +37,6 @@ coverage/
 # Database
 *.sqlite
 *.db
+
+# Local Netlify folder
+.netlify

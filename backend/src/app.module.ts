@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 
 // Use PostgreSQL if DATABASE_URL is set, otherwise use SQLite for local dev
 const isDatabaseUrl = !!process.env.DATABASE_URL;
+const isProduction = process.env.NODE_ENV === 'production';
 
 @Module({
   imports: [
@@ -16,14 +17,16 @@ const isDatabaseUrl = !!process.env.DATABASE_URL;
             type: 'postgres',
             url: process.env.DATABASE_URL,
             entities: [Note, Category, User],
-            synchronize: true,
+            migrations: ['dist/migrations/*.js'],
+            migrationsRun: true, // Auto-run migrations on startup
+            synchronize: !isProduction, // Only sync in development
             ssl: { rejectUnauthorized: false },
           }
         : {
             type: 'sqlite',
             database: 'notes.db',
             entities: [Note, Category, User],
-            synchronize: true,
+            synchronize: true, // OK for SQLite local dev
           },
     ),
     AuthModule,
