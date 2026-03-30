@@ -1,20 +1,44 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 
 @Injectable()
-export class EmailService {
+export class EmailService implements OnModuleInit {
   private transporter: nodemailer.Transporter;
+  private isEthereal = false;
 
-  constructor() {
-    this.transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST || 'smtp.gmail.com',
-      port: parseInt(process.env.SMTP_PORT || '587'),
-      secure: false,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+  async onModuleInit() {
+    await this.initializeTransporter();
+  }
+
+  private async initializeTransporter() {
+    // If SMTP credentials are provided, use them
+    if (process.env.SMTP_USER && process.env.SMTP_PASS) {
+      this.transporter = nodemailer.createTransport({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: false,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS,
+        },
+      });
+      console.log('Email service: Using configured SMTP');
+    } else {
+      // Use Ethereal for development (fake SMTP that captures emails)
+      const testAccount = await nodemailer.createTestAccount();
+      this.transporter = nodemailer.createTransport({
+        host: 'smtp.ethereal.email',
+        port: 587,
+        secure: false,
+        auth: {
+          user: testAccount.user,
+          pass: testAccount.pass,
+        },
+      });
+      this.isEthereal = true;
+      console.log('Email service: Using Ethereal (test mode)');
+      console.log('Ethereal credentials:', testAccount.user);
+    }
   }
 
   async sendPasswordResetEmail(email: string, token: string): Promise<void> {
@@ -22,7 +46,7 @@ export class EmailService {
     const resetUrl = `${frontendUrl}/reset-password?token=${token}`;
 
     const mailOptions = {
-      from: process.env.SMTP_FROM || process.env.SMTP_USER,
+      from: process.env.SMTP_FROM || 'noreply@notesapp.com',
       to: email,
       subject: 'Password Reset - Notes App',
       html: `
@@ -43,6 +67,14 @@ export class EmailService {
       `,
     };
 
-    await this.transporter.sendMail(mailOptions);
+    const info = await this.transporter.sendMail(mailOptions);
+
+    // If using Ethereal, log the preview URL
+    if (this.isEthereal) {
+      console.log('----------------------------------------');
+      console.log('PASSWORD RESET EMAIL SENT (Test Mode)');
+      console.log('Preview URL:', nodemailer.getTestMessageUrl(info));
+      console.log('----------------------------------------');
+    }
   }
 }
