@@ -44,10 +44,12 @@ export function Notes({
   const [isDeletingNote, setIsDeletingNote] = useState(false);
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [isDeletingCategory, setIsDeletingCategory] = useState(false);
+  const [isFilteringCategory, setIsFilteringCategory] = useState(false);
 
   // Sync state when server data changes (e.g., after navigation/filtering)
   useEffect(() => {
     setNotes(initialNotes);
+    setIsFilteringCategory(false);
   }, [initialNotes]);
 
   useEffect(() => {
@@ -64,6 +66,7 @@ export function Notes({
     : null;
 
   const handleSelectCategory = (id: number | null) => {
+    setIsFilteringCategory(true);
     router.push(id ? `/?category=${id}` : "/");
     setShowSidebar(false);
   };
@@ -205,6 +208,7 @@ export function Notes({
           onDelete={deleteNoteDialog.open}
           onArchive={handleArchiveNote}
           onRemoveCategory={noteOps.handleRemoveCategory}
+          isLoading={isFilteringCategory}
         />
       </main>
 
