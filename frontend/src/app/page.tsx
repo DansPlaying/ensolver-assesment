@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { getNotes, getCategories } from "@/lib/api";
+import { getNotes, getCategories } from "@/lib/queries";
 import { auth } from "@/lib/auth";
 import { Notes } from "./notes";
 
@@ -10,17 +10,17 @@ export default async function HomePage({
 }) {
   const session = await auth();
 
-  if (!session?.accessToken) {
+  if (!session?.user?.id) {
     redirect("/login");
   }
 
-  const token = session.accessToken;
+  const userId = parseInt(session.user.id);
   const params = await searchParams;
   const categoryId = params.category ? parseInt(params.category) : undefined;
 
   const [notes, categories] = await Promise.all([
-    getNotes(categoryId, token),
-    getCategories(token),
+    getNotes(userId, categoryId),
+    getCategories(userId),
   ]);
 
   return (
@@ -28,7 +28,6 @@ export default async function HomePage({
       initialNotes={notes}
       initialCategories={categories}
       selectedCategoryId={categoryId}
-      accessToken={token}
     />
   );
 }

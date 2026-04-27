@@ -57,14 +57,7 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL;
-      if (!apiUrl) {
-        setError("API URL not configured");
-        setIsLoading(false);
-        return;
-      }
-
-      const response = await fetch(`${apiUrl}/auth/register`, {
+      const response = await fetch('/api/auth/register', {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

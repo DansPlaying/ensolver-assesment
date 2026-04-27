@@ -1,8 +1,6 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-
 export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Credentials({
@@ -12,29 +10,22 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) {
-          return null;
-        }
+        if (!credentials?.email || !credentials?.password) return null;
 
         try {
-          const response = await fetch(`${API_URL}/auth/login`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              email: credentials.email,
-              password: credentials.password,
-            }),
-          });
+          const { getUserByEmail } = await import("./queries");
+          const bcrypt = await import("bcryptjs");
 
-          if (!response.ok) {
-            return null;
-          }
+          const user = await getUserByEmail(credentials.email as string);
+          if (!user) return null;
 
-          const data = await response.json();
+          const valid = await bcrypt.compare(credentials.password as string, user.password);
+          if (!valid) return null;
+
           return {
-            id: String(data.user.id),
-            email: data.user.email,
-            accessToken: data.access_token,
+            id: String(user.id),
+            email: user.email,
+            accessToken: String(user.id),
           };
         } catch {
           return null;
