@@ -1,9 +1,11 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ScheduleModule } from '@nestjs/schedule';
 import { Note, Category, User } from './entities';
 import { NotesModule } from './notes/notes.module';
 import { CategoriesModule } from './categories/categories.module';
 import { AuthModule } from './auth/auth.module';
+import { KeepAliveService } from './keep-alive.service';
 
 // Use PostgreSQL if DATABASE_URL is set, otherwise use SQLite for local dev
 const isDatabaseUrl = !!process.env.DATABASE_URL;
@@ -11,6 +13,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     TypeOrmModule.forRoot(
       isDatabaseUrl
         ? {
@@ -34,6 +37,6 @@ const isProduction = process.env.NODE_ENV === 'production';
     CategoriesModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [KeepAliveService],
 })
 export class AppModule {}

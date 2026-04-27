@@ -42,21 +42,29 @@ export async function getNotes(categoryId?: number, token?: string): Promise<Not
   const url = categoryId
     ? `${API_URL}/notes?categoryId=${categoryId}`
     : `${API_URL}/notes`;
-  const res = await fetch(url, {
-    headers: getHeaders(token),
-    cache: 'no-store',
-  });
-  if (!res.ok) throw new Error('Failed to fetch notes');
-  return res.json();
+  try {
+    const res = await fetch(url, {
+      headers: getHeaders(token),
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
 }
 
 export async function getArchivedNotes(token?: string): Promise<Note[]> {
-  const res = await fetch(`${API_URL}/notes/archived`, {
-    headers: getHeaders(token),
-    cache: 'no-store',
-  });
-  if (!res.ok) throw new Error('Failed to fetch archived notes');
-  return res.json();
+  try {
+    const res = await fetch(`${API_URL}/notes/archived`, {
+      headers: getHeaders(token),
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
 }
 
 export async function getNote(id: number, token?: string): Promise<Note> {
@@ -151,12 +159,16 @@ export async function removeCategoryFromNote(
 
 // Categories API
 export async function getCategories(token?: string): Promise<Category[]> {
-  const res = await fetch(`${API_URL}/categories`, {
-    headers: getHeaders(token),
-    cache: 'no-store',
-  });
-  if (!res.ok) throw new Error('Failed to fetch categories');
-  return res.json();
+  try {
+    const res = await fetch(`${API_URL}/categories`, {
+      headers: getHeaders(token),
+      cache: 'no-store',
+    });
+    if (!res.ok) return [];
+    return res.json();
+  } catch {
+    return [];
+  }
 }
 
 export async function createCategory(name: string, token?: string): Promise<Category> {
